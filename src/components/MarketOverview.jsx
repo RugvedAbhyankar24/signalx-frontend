@@ -30,6 +30,18 @@ export default function MarketOverview() {
     if (num === null || num === undefined) return 'N/A'
     return num.toLocaleString('en-IN', { maximumFractionDigits: 2 })
   }
+  const isMarketOpenIST = () => {
+  const now = new Date(
+    new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })
+  )
+
+  const day = now.getDay()
+  if (day === 0 || day === 6) return false // Sunday, Saturday
+
+  const minutes = now.getHours() * 60 + now.getMinutes()
+  return minutes >= 555 && minutes <= 930 // 9:15 AM – 3:30 PM
+}
+
 
   const Card = ({ title, d }) => {
     if (!d) return null
@@ -80,10 +92,24 @@ export default function MarketOverview() {
       <Card title="BANK NIFTY" d={data.bankNifty} />
       <Card title="SENSEX" d={data.sensex} />
       {data.timestamp && (
-        <div className="market-timestamp">
-          Updated: {new Date(data.timestamp).toLocaleTimeString()}
-        </div>
-      )}
+  <div className="market-timestamp">
+    {isMarketOpenIST()
+      ? `Updated ${new Date(data.timestamp).toLocaleTimeString('en-IN', {
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'Asia/Kolkata'
+        })} IST`
+      : `As of ${new Date(data.timestamp).toLocaleString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'Asia/Kolkata'
+        })} IST`}
+  </div>
+)}
+
     </div>
   )
 }
