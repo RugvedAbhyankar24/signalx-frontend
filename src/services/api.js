@@ -1,8 +1,10 @@
 import axios from 'axios';
 
+const API_BASE = 'https://signalx-backend.onrender.com/api';
+
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE,
   timeout: 10000, // 10 seconds
   headers: {
     'Content-Type': 'application/json',
@@ -62,11 +64,10 @@ export default {
   scanMultiple: (symbols) => 
     api.post('/scan', { symbols }),
 
-getTicker: () => api.get('/ticker'),
+  getTicker: () => api.get('/ticker'),
 
-// Market indices (NIFTY / BANK NIFTY / SENSEX)
-getMarketIndices: () =>
-  api.get('/market/indices'),
+  // Market indices (NIFTY / BANK NIFTY / SENSEX)
+  getMarketIndices: () => api.get('/market/indices'),
 
   
   // Add more API calls as needed
