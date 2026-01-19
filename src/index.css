@@ -150,7 +150,14 @@ button:disabled {
 
 .result-grid {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.center-card {
+  width: 100%;
+  max-width: 600px;
 }
 
 .card {
@@ -714,4 +721,292 @@ button:disabled {
   text-align: left;    /* align with content */
   font-size: 12px;
   color: rgba(255,255,255,0.5);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Mobile: 0px - 768px */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+    max-width: 100%;
+  }
+
+  .hero h1 {
+    font-size: 24px;
+    line-height: 1.2;
+    max-width: 100%;
+  }
+
+  .hero p {
+    font-size: 14px;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .right-panel {
+    position: static;
+    order: 2;
+    margin-top: 16px;
+  }
+
+  .search-box {
+    padding: 0 16px;
+    margin-top: 16px;
+  }
+
+  .search-box input {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  .search-box button {
+    min-width: 140px;
+    font-size: 13px;
+    padding: 12px 20px; /* Larger touch target */
+  }
+
+  .card {
+    padding: 20px;
+    margin: 0 4px;
+  }
+
+  .center-card {
+    max-width: 100%;
+  }
+
+  .ticker {
+    height: 48px;
+  }
+
+  .ticker-item {
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .ticker-label {
+    font-size: 10px;
+    padding: 0 8px;
+  }
+
+  .top-left-logo {
+    top: 12px;
+    left: 12px;
+    padding: 4px 8px;
+  }
+
+  .app-logo {
+    height: 32px;
+  }
+
+  .main-content {
+    padding-top: 48px;
+  }
+
+  .market-panel {
+    padding: 12px;
+  }
+
+  .index-card {
+    padding: 6px 8px;
+    margin-top: 8px;
+  }
+
+  .index-name {
+    font-size: 13px;
+  }
+
+  .index-row {
+    font-size: 10px;
+  }
+
+  .index-change {
+    font-size: 11px;
+  }
+
+  .footer {
+    padding: 16px;
+    font-size: 10px;
+  }
+}
+
+/* Tablet: 769px - 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    padding: 20px;
+    max-width: 100%;
+  }
+
+  .hero h1 {
+    font-size: 28px;
+  }
+
+  .layout {
+    grid-template-columns: 1fr 280px;
+    gap: 28px;
+  }
+
+  .search-box {
+    padding: 0 20px;
+  }
+
+  .card {
+    padding: 22px;
+  }
+
+  .center-card {
+    max-width: 520px;
+  }
+
+  .ticker {
+    height: 52px;
+  }
+
+  .ticker-item {
+    font-size: 12px;
+  }
+
+  .market-panel {
+    padding: 14px;
+  }
+
+  .index-card {
+    padding: 7px 9px;
+  }
+}
+
+/* Small Desktop: 1025px - 1280px */
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .container {
+    max-width: 1200px;
+  }
+
+  .layout {
+    grid-template-columns: 1fr 320px;
+  }
+}
+
+/* Large Desktop: 1281px+ */
+@media (min-width: 1281px) {
+  .container {
+    max-width: 1400px;
+  }
+
+  .hero h1 {
+    font-size: 36px;
+  }
+
+  .search-box {
+    max-width: 680px;
+  }
+
+  .center-card {
+    max-width: 700px;
+  }
+}
+
+/* Extra small mobile adjustments */
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 20px;
+  }
+
+  .hero p {
+    font-size: 13px;
+  }
+
+  .search-box {
+    padding: 0 12px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .symbol {
+    font-size: 18px;
+  }
+
+  .section-title {
+    font-size: 12px;
+  }
+
+  .kv {
+    gap: 12px;
+  }
+
+  .ticker {
+    height: 44px;
+  }
+
+  .ticker-item {
+    font-size: 10px;
+    padding: 0 6px;
+  }
+
+  .ticker-label {
+    font-size: 9px;
+    padding: 0 6px;
+  }
+
+  .market-panel h3 {
+    font-size: 14px;
+  }
+
+  .index-name {
+    font-size: 12px;
+  }
+
+  .index-row {
+    font-size: 9px;
+  }
+
+  .index-change {
+    font-size: 10px;
+  }
+
+  .top-left-logo {
+    top: 8px;
+    left: 8px;
+    padding: 3px 6px;
+  }
+
+  .app-logo {
+    height: 28px;
+  }
+
+  .main-content {
+    padding-top: 52px;
+  }
+}
+
+/* Landscape mobile adjustments */
+@media (max-height: 600px) and (orientation: landscape) {
+  .container {
+    padding: 12px;
+  }
+
+  .hero {
+    margin-bottom: 16px;
+  }
+
+  .hero h1 {
+    font-size: 22px;
+    margin-bottom: 2px;
+  }
+
+  .search-box {
+    margin-top: 12px;
+    margin-bottom: 24px;
+  }
+
+  .ticker {
+    height: 40px;
+  }
+
+  .main-content {
+    padding-top: 32px;
+  }
 }
