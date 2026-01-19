@@ -18,6 +18,7 @@ export default function MarketTicker() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load()
     const i = setInterval(load, 60000)
     return () => clearInterval(i)

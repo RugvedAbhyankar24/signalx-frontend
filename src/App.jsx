@@ -35,7 +35,6 @@ export default function App() {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [marketLive, setMarketLive] = useState(isMarketOpen())
   const [lastUpdated, setLastUpdated] = useState(null)
-  const [activeTab, setActiveTab] = useState('scan')
   const autoRefreshRef = useRef(null)
 
   useEffect(() => {
@@ -79,6 +78,7 @@ export default function App() {
     if (!marketLive || !symbolsInput.trim()) return
     autoRefreshRef.current = setInterval(runScan, 60000)
     return () => clearInterval(autoRefreshRef.current)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [marketLive, symbolsInput])
 
   const SkeletonCard = () => (
