@@ -153,7 +153,7 @@ export default function StockCard({ item }) {
   )}
 </div>
 <div className="section">
-  <div className="section-title">Swing / Long Term View</div>
+  <div className="section-title">🎢 Swing / Long Term View</div>
 
   <div className="kv">
     <span>Swing</span>
@@ -162,12 +162,28 @@ export default function StockCard({ item }) {
     </span>
   </div>
 
+  {item.swingView?.reasons && (
+    <div className="inline-reasons">
+      {item.swingView.reasons.map((r, i) => (
+        <div key={i}>• {r}</div>
+      ))}
+    </div>
+  )}
+
   <div className="kv">
     <span>Long Term</span>
     <span className="pill pill-info">
       {item.longTermView?.label}
     </span>
   </div>
+
+  {item.longTermView?.reasons && (
+    <div className="inline-reasons">
+      {item.longTermView.reasons.map((r, i) => (
+        <div key={i}>• {r}</div>
+      ))}
+    </div>
+  )}
 </div>
 
 
