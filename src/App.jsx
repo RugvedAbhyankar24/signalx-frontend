@@ -3,16 +3,64 @@ import API from './services/api'
 import StockCard from './components/StockCard'
 import MarketTicker from './components/MarketTicker'
 import MarketOverview from './components/MarketOverview'
+import IntradayStocksList from './components/IntradayStocksList'
+import SwingStocksList from './components/SwingStocksList'
+import CollapsibleSection from './components/CollapsibleSection'
 
 const NSE_SUGGESTIONS = [
   { symbol: 'RELIANCE', name: 'Reliance Industries Ltd' },
   { symbol: 'TCS', name: 'Tata Consultancy Services' },
-  { symbol: 'INFY', name: 'Infosys Ltd' },
   { symbol: 'HDFCBANK', name: 'HDFC Bank Ltd' },
   { symbol: 'ICICIBANK', name: 'ICICI Bank Ltd' },
-  { symbol: 'BEL', name: 'Bharat Electronics Ltd' },
+  { symbol: 'INFY', name: 'Infosys Ltd' },
+  { symbol: 'HINDUNILVR', name: 'Hindustan Unilever Ltd' },
+  { symbol: 'SBIN', name: 'State Bank of India' },
+  { symbol: 'BHARTIARTL', name: 'Bharti Airtel Ltd' },
+  { symbol: 'KOTAKBANK', name: 'Kotak Mahindra Bank Ltd' },
   { symbol: 'LT', name: 'Larsen & Toubro Ltd' },
-  { symbol: 'BHARTIARTL', name: 'Bharti Airtel Ltd' }
+  { symbol: 'ITC', name: 'ITC Ltd' },
+  { symbol: 'AXISBANK', name: 'Axis Bank Ltd' },
+  { symbol: 'MARUTI', name: 'Maruti Suzuki India Ltd' },
+  { symbol: 'ASIANPAINT', name: 'Asian Paints Ltd' },
+  { symbol: 'M&M', name: 'Mahindra & Mahindra Ltd' },
+  { symbol: 'HCLTECH', name: 'HCL Technologies Ltd' },
+  { symbol: 'TECHM', name: 'Tech Mahindra Ltd' },
+  { symbol: 'DRREDDY', name: 'Dr. Reddy\'s Laboratories Ltd' },
+  { symbol: 'ULTRACEMCO', name: 'UltraTech Cement Ltd' },
+  { symbol: 'NESTLEIND', name: 'Nestle India Ltd' },
+  { symbol: 'POWERGRID', name: 'Power Grid Corporation of India Ltd' },
+  { symbol: 'TATAMOTORS', name: 'Tata Motors Ltd' },
+  { symbol: 'GRASIM', name: 'Grasim Industries Ltd' },
+  { symbol: 'BAJFINANCE', name: 'Bajaj Finance Ltd' },
+  { symbol: 'INDUSINDBK', name: 'IndusInd Bank Ltd' },
+  { symbol: 'COALINDIA', name: 'Coal India Ltd' },
+  { symbol: 'BPCL', name: 'Bharat Petroleum Corporation Ltd' },
+  { symbol: 'SHREECEM', name: 'Shree Cement Ltd' },
+  { symbol: 'BRITANNIA', name: 'Britannia Industries Ltd' },
+  { symbol: 'DIVISLAB', name: 'Divi\'s Laboratories Ltd' },
+  { symbol: 'HEROMOTOCO', name: 'Hero MotoCorp Ltd' },
+  { symbol: 'BAJAJFINSV', name: 'Bajaj Finserv Ltd' },
+  { symbol: 'EICHERMOT', name: 'Eicher Motors Ltd' },
+  { symbol: 'UPL', name: 'UPL Ltd' },
+  { symbol: 'HDFCLIFE', name: 'HDFC Life Insurance Company Ltd' },
+  { symbol: 'IOC', name: 'Indian Oil Corporation Ltd' },
+  { symbol: 'JSWSTEEL', name: 'JSW Steel Ltd' },
+  { symbol: 'TITAN', name: 'Titan Company Ltd' },
+  { symbol: 'NTPC', name: 'NTPC Ltd' },
+  { symbol: 'SUNPHARMA', name: 'Sun Pharmaceutical Industries Ltd' },
+  { symbol: 'TATASTEEL', name: 'Tata Steel Ltd' },
+  { symbol: 'WIPRO', name: 'Wipro Ltd' },
+  { symbol: 'ADANIPORTS', name: 'Adani Ports and Special Economic Zone Ltd' },
+  { symbol: 'DABUR', name: 'Dabur India Ltd' },
+  { symbol: 'CIPLA', name: 'Cipla Ltd' },
+  { symbol: 'BEL', name: 'Bharat Electronics Ltd' },
+  { symbol: 'TATACONSUM', name: 'Tata Consumer Products Ltd' },
+  { symbol: 'ONGC', name: 'Oil and Natural Gas Corporation Ltd' },
+  { symbol: 'GAIL', name: 'GAIL (India) Ltd' },
+  { symbol: 'SBILIFE', name: 'SBI Life Insurance Company Ltd' },
+  { symbol: 'HINDALCO', name: 'Hindalco Industries Ltd' },
+  { symbol: 'TATACOMM', name: 'Tata Communications Ltd' },
+  { symbol: 'VEDL', name: 'Vedanta Ltd' }
 ]
 
 const isMarketOpen = () => {
@@ -210,7 +258,6 @@ export default function App() {
 )}
 
           </div>
-          
 
           <div className="result-section">
             {loading ? (
@@ -226,6 +273,14 @@ export default function App() {
               </div>
             ) : null}
           </div>
+
+          <CollapsibleSection title="🔥 Intraday Positive Stocks" defaultCollapsed={true}>
+            <IntradayStocksList />
+          </CollapsibleSection>
+
+          <CollapsibleSection title="🔥 Swing Trading Opportunities" defaultCollapsed={true}>
+            <SwingStocksList />
+          </CollapsibleSection>
 
         </div>
 

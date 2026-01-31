@@ -69,6 +69,14 @@ export default {
   // Market indices (NIFTY / BANK NIFTY / SENSEX)
   getMarketIndices: () => api.get('/market/indices'),
 
+  // Intraday positive stocks
+  getIntradayPositiveStocks: (symbols) => 
+    api.post('/intraday', { symbols }),
+
+  // Swing trading positive stocks
+  getSwingPositiveStocks: (symbols) => 
+    api.post('/swing', { symbols }),
+
   
   // Add more API calls as needed
 };
