@@ -27,8 +27,8 @@ const SwingStocksList = () => {
   useEffect(() => {
     fetchSwingStocks()
     
-    // Auto-refresh every 5 minutes (swing signals change less frequently)
-    const interval = setInterval(fetchSwingStocks, 300000)
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchSwingStocks, 30000)
     return () => clearInterval(interval)
   }, [])
 

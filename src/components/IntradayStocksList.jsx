@@ -27,8 +27,8 @@ const IntradayStocksList = () => {
   useEffect(() => {
     fetchIntradayStocks()
     
-    // Auto-refresh every 2 minutes
-    const interval = setInterval(fetchIntradayStocks, 120000)
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchIntradayStocks, 30000)
     return () => clearInterval(interval)
   }, [])
 
