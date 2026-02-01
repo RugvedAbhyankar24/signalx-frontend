@@ -72,6 +72,17 @@ const isMarketOpen = () => {
   if (day === 0 || day === 6) return false
 
   const minutes = ist.getHours() * 60 + ist.getMinutes()
+  
+  // Check for budget session (Feb 1st - extended hours)
+  const today = ist.getDate()
+  const month = ist.getMonth() + 1 // JavaScript months are 0-indexed
+  
+  // Budget session: 9:15 AM to 5:00 PM IST (555 to 1020 minutes)
+  if (month === 2 && today === 1) {
+    return minutes >= 555 && minutes <= 1020
+  }
+  
+  // Normal market hours: 9:15 AM to 3:30 PM IST (555 to 930 minutes)
   return minutes >= 555 && minutes <= 930
 }
 
