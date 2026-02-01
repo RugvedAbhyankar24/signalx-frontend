@@ -74,10 +74,10 @@ const isMarketOpen = () => {
   const today = ist.getDate()
   const month = ist.getMonth() + 1 // JavaScript months are 0-indexed
   
-  // Budget session: 9:15 AM to 5:00 PM IST (555 to 1020 minutes)
+  // Budget session: 9:15 AM to 3:30 PM IST (555 to 930 minutes) - same as regular hours
   // Note: Budget session can be on Sunday, so we don't check weekend here
   if (month === 2 && today === 1) {
-    return minutes >= 555 && minutes <= 1020
+    return minutes >= 555 && minutes <= 930
   }
   
   // For normal days, check if it's weekday
