@@ -10,6 +10,29 @@ export default function StockCard({ item }) {
     return String(v)
   }
 
+  const formatNewsDate = (timestamp) => {
+    if (!timestamp) return ''
+    
+    const date = new Date(timestamp * 1000) // Convert from Unix timestamp
+    const now = new Date()
+    const diffInHours = (now - date) / (1000 * 60 * 60)
+    
+    if (diffInHours < 1) {
+      const diffInMinutes = Math.floor((now - date) / (1000 * 60))
+      return `${diffInMinutes} min ago`
+    } else if (diffInHours < 24) {
+      return `${Math.floor(diffInHours)} hours ago`
+    } else if (diffInHours < 48) {
+      return 'Yesterday'
+    } else {
+      return date.toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+      })
+    }
+  }
+
   if (item.error) {
     return (
       <div className="card center-card">
@@ -55,7 +78,15 @@ export default function StockCard({ item }) {
               <a className="link" href={n.url} target="_blank" rel="noreferrer">
                 {n.headline}
               </a>
-              {n.source && <span className="muted"> — {n.source}</span>}
+              <div className="news-meta">
+                {n.source && <span className="muted">{n.source}</span>}
+                {n.datetime && (
+                  <span className="muted">
+                    {' — '}
+                    {formatNewsDate(n.datetime)}
+                  </span>
+                )}
+              </div>
             </div>
           ))}
         </div>

@@ -235,6 +235,15 @@ button:disabled {
   padding-right: 6px; /* ⬅ subtle but important */
 }
 
+.news-meta {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 
 .link {
   color: var(--accent);
