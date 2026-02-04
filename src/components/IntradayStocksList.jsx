@@ -27,7 +27,7 @@ const IntradayStocksList = () => {
   useEffect(() => {
     fetchIntradayStocks()
     
-    // Auto-refresh every 30 seconds
+    // Auto-refresh every 30 seconds (NSE API rate limit protection)
     const interval = setInterval(fetchIntradayStocks, 30000)
     return () => clearInterval(interval)
   }, [])
@@ -76,7 +76,10 @@ const IntradayStocksList = () => {
   return (
     <div className="intraday-stocks-container">
       <div className="intraday-header">
-        <h2>🔥 Intraday Positive Stocks</h2>
+        <div className="intraday-title">
+          <h2>🔥 Intraday Positive Stocks</h2>
+          <span className="live-indicator">● LIVE</span>
+        </div>
         <div className="intraday-controls">
           <button 
             onClick={fetchIntradayStocks} 
@@ -87,7 +90,7 @@ const IntradayStocksList = () => {
           </button>
           {lastUpdated && (
             <span className="last-updated">
-              Last: {lastUpdated.toLocaleTimeString()}
+              Last: {lastUpdated.toLocaleTimeString()} ({lastUpdated.toLocaleDateString()})
             </span>
           )}
         </div>
@@ -127,6 +130,38 @@ const IntradayStocksList = () => {
                   <span className="metric-value">{formatPrice(stock.currentPrice)}</span>
                 </div>
                 
+                <div className="metric-row entry-price">
+                  <span className="metric-label">Entry Price:</span>
+                  <span className="metric-value entry-price-value">{formatPrice(stock.entryPrice)}</span>
+                </div>
+
+                <div className="metric-row">
+                  <span className="metric-label">Stop Loss:</span>
+                  <span className="metric-value stop-loss">{formatPrice(stock.stopLoss)}</span>
+                </div>
+
+                <div className="metric-row">
+                  <span className="metric-label">Target 1:</span>
+                  <span className="metric-value target">{formatPrice(stock.target1)}</span>
+                </div>
+
+                <div className="metric-row">
+                  <span className="metric-label">Target 2:</span>
+                  <span className="metric-value target2">{formatPrice(stock.target2)}</span>
+                </div>
+
+                <div className="metric-row">
+                  <span className="metric-label">Risk/Reward:</span>
+                  <span className="metric-value risk-reward">1:{stock.riskReward}</span>
+                </div>
+
+                <div className="metric-row entry-reason">
+                  <span className="metric-label">Entry Reason:</span>
+                  <span className="metric-value entry-reason-text">
+                    {stock.entryReason?.replace(/\s+/g, ' ').trim()}
+                  </span>
+                </div>
+                
                 <div className="metric-row">
                   <span className="metric-label">Gap:</span>
                   <span className={`metric-value ${stock.gapNowPct >= 0 ? 'positive' : 'negative'}`}>
@@ -137,6 +172,16 @@ const IntradayStocksList = () => {
                 <div className="metric-row">
                   <span className="metric-label">RSI:</span>
                   <span className="metric-value">{stock.rsi?.toFixed(1) || 'N/A'}</span>
+                </div>
+
+                <div className="metric-row">
+                  <span className="metric-label">VWAP:</span>
+                  <span className={`metric-value ${stock.vwap && stock.currentPrice && stock.vwap > stock.currentPrice * 1.1 ? 'vwap-warning' : 'neutral'}`}>
+                    {formatPrice(stock.vwap)}
+                    {stock.vwap && stock.currentPrice && stock.vwap > stock.currentPrice * 1.1 && (
+                      <span className="vwap-warning-text"> (far above - mean reversion risk)</span>
+                    )}
+                  </span>
                 </div>
 
                 <div className="metric-row">

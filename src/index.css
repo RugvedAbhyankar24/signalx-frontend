@@ -1043,31 +1043,209 @@ button:disabled {
   margin-bottom: 3px;
 }
 
+/* Swing Entry Price Styles */
+.entry-price-section {
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin: 8px 0;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.metric-value.entry-price-value {
+  color: #22c55e;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.metric-value.stop-loss {
+  color: #ef4444;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.metric-value.target {
+  color: #3b82f6;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.metric-value.target2 {
+  color: #8b5cf6;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.metric-value.risk-reward {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.metric-row.entry-reason {
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin: 8px 0;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.metric-value.entry-reason-text {
+  color: #3b82f6;
+  font-weight: 500;
+  font-size: 11px;
+  text-align: right;
+  max-width: 60%;
+  line-height: 1.2;
+}
+
+.metric-value.vwap-warning {
+  color: #ef4444;
+  font-weight: 600;
+  animation: pulse-warning 2s infinite;
+}
+
+.vwap-warning-text {
+  color: #ef4444;
+  font-size: 10px;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+@keyframes pulse-warning {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Make swing stock cards more compact */
+.swing-stock-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(96, 165, 250, 0.1);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.swing-stock-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(96, 165, 250, 0.3);
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.1);
+}
+
+.swing-stocks-metrics {
+  font-size: 12px;
+}
+
+/* Swing Stocks List Styles */
+.swing-stocks-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.swing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.swing-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.swing-title h2 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--text);
+}
+
+.swing-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.refresh-btn {
+  background: rgba(96, 165, 250, 0.2);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  color: var(--text);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background: rgba(96, 165, 250, 0.3);
+  border-color: rgba(96, 165, 250, 0.5);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.last-updated {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
 /* Intraday Stocks List Styles */
 .intraday-stocks-container {
-  margin-top: 32px;
-  padding: 24px;
-  background: var(--card);
-  border-radius: 12px;
-  border: 1px solid rgba(96, 165, 250, 0.1);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 .intraday-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
+  gap: 16px;
+}
+
+.intraday-title {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-.intraday-header h2 {
+.intraday-title h2 {
   margin: 0;
   font-size: 24px;
+  color: var(--text);
+}
+
+.live-indicator {
+  color: #ef4444;
+  font-weight: 600;
+  font-size: 14px;
+  animation: pulse 2s infinite;
+  margin-left: 8px;
   background: linear-gradient(90deg, #f59e0b, #ef4444);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .intraday-controls {
@@ -1190,6 +1368,112 @@ button:disabled {
 
 .metric-value.neutral {
   color: var(--muted);
+}
+
+/* Entry price specific styling */
+.metric-row.entry-price {
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin: 8px 0;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.metric-value.entry-price-value {
+  color: #22c55e;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.metric-value.stop-loss {
+  color: #ef4444;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.metric-value.target {
+  color: #3b82f6;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.metric-value.target2 {
+  color: #8b5cf6;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.metric-value.risk-reward {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+/* Add pulse effect for updated values */
+.metric-value.updated {
+  animation: valueUpdate 0.6s ease;
+}
+
+@keyframes valueUpdate {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); color: #fbbf24; }
+  100% { transform: scale(1); }
+}
+
+.metric-row.entry-reason {
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin: 8px 0;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.metric-value.entry-reason-text {
+  color: #3b82f6;
+  font-weight: 500;
+  font-size: 11px;
+  text-align: right;
+  max-width: 60%;
+  line-height: 1.2;
+}
+
+/* Make stock cards more compact */
+.intraday-stock-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(96, 165, 250, 0.1);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.intraday-stock-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(96, 165, 250, 0.3);
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.1);
+}
+
+/* Add flash effect when data updates */
+.intraday-stock-card.updated {
+  animation: dataFlash 0.5s ease;
+}
+
+@keyframes dataFlash {
+  0% { background: rgba(96, 165, 250, 0.1); }
+  100% { background: rgba(255, 255, 255, 0.02); }
+}
+
+.stock-metrics {
+  font-size: 12px;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 0;
+  font-size: 12px;
 }
 
 .stock-reasons {
