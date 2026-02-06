@@ -58,11 +58,11 @@ export default {
   
   // Scan endpoints
   scan: (params) => 
-    api.post('/scan', params, { timeout: 25000 }), // 25 seconds for scan
+    api.post('/scan', params, { timeout: 60000 }), // 60 seconds for scan
   
   // Multiple symbols scan
   scanMultiple: (symbols) => 
-    api.post('/scan', { symbols }, { timeout: 25000 }), // 25 seconds for scan
+    api.post('/scan', { symbols }, { timeout: 60000 }), // 60 seconds for scan
 
   getTicker: () => api.get('/ticker'),
 
@@ -71,11 +71,25 @@ export default {
 
   // Intraday positive stocks
   getIntradayPositiveStocks: (symbols) => 
-    api.post('/intraday', { symbols }, { timeout: 25000 }), // 25 seconds for intraday
+    api.post('/intraday', { symbols }, { timeout: 60000 }), // 60 seconds for intraday
+
+  // Background scan endpoints
+  startIntradayScan: () => 
+    api.post('/intraday/start', {}, { timeout: 5000 }), // 5 seconds to start scan
+
+  getIntradayStatus: () => 
+    api.get('/intraday/status', { timeout: 5000 }), // 5 seconds to get status
 
   // Swing trading positive stocks
   getSwingPositiveStocks: (symbols) => 
-    api.post('/swing', { symbols }, { timeout: 25000 }), // 25 seconds for swing
+    api.post('/swing', { symbols }, { timeout: 60000 }), // 60 seconds for swing
+
+  // Background swing scan endpoints
+  startSwingScan: () => 
+    api.post('/swing/start', {}, { timeout: 5000 }), // 5 seconds to start scan
+
+  getSwingStatus: () => 
+    api.get('/swing/status', { timeout: 5000 }), // 5 seconds to get status
 
   
   // Add more API calls as needed
