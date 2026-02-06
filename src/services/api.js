@@ -58,11 +58,11 @@ export default {
   
   // Scan endpoints
   scan: (params) => 
-    api.post('/scan', params),
+    api.post('/scan', params, { timeout: 25000 }), // 25 seconds for scan
   
   // Multiple symbols scan
   scanMultiple: (symbols) => 
-    api.post('/scan', { symbols }),
+    api.post('/scan', { symbols }, { timeout: 25000 }), // 25 seconds for scan
 
   getTicker: () => api.get('/ticker'),
 
@@ -71,11 +71,11 @@ export default {
 
   // Intraday positive stocks
   getIntradayPositiveStocks: (symbols) => 
-    api.post('/intraday', { symbols }),
+    api.post('/intraday', { symbols }, { timeout: 25000 }), // 25 seconds for intraday
 
   // Swing trading positive stocks
   getSwingPositiveStocks: (symbols) => 
-    api.post('/swing', { symbols }),
+    api.post('/swing', { symbols }, { timeout: 25000 }), // 25 seconds for swing
 
   
   // Add more API calls as needed
