@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = 'https://signalx-backend.onrender.com/api';
+const API_BASE = 'https://signalx-backend-production.up.railway.app/api';
 
 // Create an axios instance with default config
 const api = axios.create({
