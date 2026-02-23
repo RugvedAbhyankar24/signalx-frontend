@@ -5,7 +5,6 @@ import MarketTicker from './components/MarketTicker'
 import MarketOverview from './components/MarketOverview'
 import IntradayStocksList from './components/IntradayStocksList'
 import SwingStocksList from './components/SwingStocksList'
-import IntradayBacktestPanel from './components/IntradayBacktestPanel'
 import CollapsibleSection from './components/CollapsibleSection'
 
 const NSE_SUGGESTIONS = [
@@ -294,10 +293,6 @@ export default function App() {
 
           <CollapsibleSection title="🔥 Swing Trading Opportunities" defaultCollapsed={true}>
             <SwingStocksList />
-          </CollapsibleSection>
-
-          <CollapsibleSection title="🧪 Intraday Backtest" defaultCollapsed={true}>
-            <IntradayBacktestPanel />
           </CollapsibleSection>
 
         </div>

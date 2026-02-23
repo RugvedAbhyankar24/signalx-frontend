@@ -80,15 +80,9 @@ export default {
   getIntradayStatus: () => 
     api.get('/intraday/status', { timeout: 5000 }), // 5 seconds to get status
 
-  // Intraday backtest endpoints
-  getIntradayBacktestSnapshots: (params) =>
-    api.get('/intraday/backtest/snapshots', { params, timeout: 10000 }),
-
-  getIntradayBacktestRuns: (params) =>
-    api.get('/intraday/backtest/runs', { params, timeout: 10000 }),
-
-  runIntradayBacktest: (payload) =>
-    api.post('/intraday/backtest/run', payload, { timeout: 120000 }),
+  // Stored intraday entry picks (DB)
+  getIntradayEntries: (params) =>
+    api.get('/intraday/entries', { params, timeout: 10000 }),
 
   // Swing trading positive stocks
   getSwingPositiveStocks: (symbols) => 
