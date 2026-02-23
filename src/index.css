@@ -1846,3 +1846,297 @@ button:disabled {
     padding: 16px;
   }
 }
+
+/* Intraday Backtest Panel */
+.intraday-backtest-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.intraday-backtest-header h2 {
+  margin: 0;
+  font-size: 22px;
+  color: var(--text);
+}
+
+.intraday-backtest-header p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.intraday-backtest-controls {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.intraday-backtest-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.intraday-backtest-controls input,
+.intraday-backtest-controls select {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 9px 10px;
+  outline: none;
+}
+
+.intraday-backtest-controls input:focus,
+.intraday-backtest-controls select:focus {
+  border-color: rgba(96, 165, 250, 0.55);
+}
+
+.run-backtest-btn {
+  border: 1px solid rgba(59, 130, 246, 0.55);
+  background: rgba(59, 130, 246, 0.25);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.intraday-backtest-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.intraday-backtest-actions .run-backtest-btn {
+  min-width: 220px;
+}
+
+.run-backtest-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.intraday-backtest-meta {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.intraday-backtest-meta span {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(96, 165, 250, 0.15);
+  border-radius: 999px;
+  padding: 4px 9px;
+}
+
+.intraday-backtest-error {
+  margin-top: 14px;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.intraday-backtest-empty {
+  margin-top: 14px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(96, 165, 250, 0.25);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 13px;
+}
+
+.intraday-backtest-empty-title {
+  color: var(--text);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.intraday-backtest-empty-body {
+  margin-bottom: 10px;
+}
+
+.intraday-backtest-empty-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.intraday-backtest-empty-cta .run-backtest-btn {
+  min-width: 170px;
+}
+
+.intraday-backtest-summary-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.intraday-backtest-summary-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(96, 165, 250, 0.15);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.intraday-backtest-summary-card .k {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.intraday-backtest-summary-card .v {
+  margin-top: 6px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pnl-pos {
+  color: #22c55e !important;
+}
+
+.pnl-neg {
+  color: #ef4444 !important;
+}
+
+.intraday-backtest-trades {
+  margin-top: 20px;
+}
+
+.intraday-backtest-diagnostics {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.intraday-backtest-diag-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(96, 165, 250, 0.15);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.intraday-backtest-diag-card h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.intraday-backtest-diag-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.intraday-backtest-diag-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) auto auto auto;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.intraday-backtest-trades h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.intraday-backtest-trades-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(96, 165, 250, 0.15);
+  border-radius: 10px;
+}
+
+.intraday-backtest-trades-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.intraday-backtest-trades-table th,
+.intraday-backtest-trades-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(96, 165, 250, 0.12);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.intraday-backtest-trades-table th {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.collapsible-section:has(.intraday-backtest-container) {
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.collapsible-section:has(.intraday-backtest-container) .collapsible-header h2 {
+  background: linear-gradient(90deg, #3b82f6, #22c55e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.collapsible-section:has(.intraday-backtest-container) .collapse-toggle {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.35);
+  color: #3b82f6;
+}
+
+.collapsible-section:has(.intraday-backtest-container) .collapse-toggle:hover {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+@media (max-width: 980px) {
+  .intraday-backtest-controls {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .intraday-backtest-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .intraday-backtest-actions .run-backtest-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .intraday-backtest-empty-cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .intraday-backtest-empty-cta .run-backtest-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .intraday-backtest-diagnostics {
+    grid-template-columns: 1fr;
+  }
+
+  .intraday-backtest-diag-row {
+    grid-template-columns: 1fr auto;
+  }
+}
