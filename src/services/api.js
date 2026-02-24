@@ -80,10 +80,6 @@ export default {
   getIntradayStatus: () => 
     api.get('/intraday/status', { timeout: 5000 }), // 5 seconds to get status
 
-  // Stored intraday entry picks (DB)
-  getIntradayEntries: (params) =>
-    api.get('/intraday/entries', { params, timeout: 10000 }),
-
   // Swing trading positive stocks
   getSwingPositiveStocks: (symbols) => 
     api.post('/swing', { symbols }, { timeout: 60000 }), // 60 seconds for swing
