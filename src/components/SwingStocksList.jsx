@@ -64,6 +64,19 @@ const SwingStocksList = () => {
     }
   }
 
+  const getActionableToneClass = (quality) => {
+    switch (quality?.tone) {
+      case 'positive':
+        return 'entry-quality-positive'
+      case 'neutral':
+        return 'entry-quality-neutral'
+      case 'negative':
+        return 'entry-quality-negative'
+      default:
+        return 'entry-quality-neutral'
+    }
+  }
+
   if (loading && stocks.length === 0) {
     return (
       <div className="swing-stocks-container">
@@ -116,11 +129,18 @@ const SwingStocksList = () => {
                   <h3>{stock.symbol}</h3>
                   <p className="company-name">{stock.companyName}</p>
                 </div>
-                <div 
-                  className="signal-badge"
-                  style={{ backgroundColor: getSignalColor(stock.swingView.label) }}
-                >
-                  {stock.swingView.label}
+                <div className="stock-badges">
+                  <div
+                    className="signal-badge"
+                    style={{ backgroundColor: getSignalColor(stock.swingView.label) }}
+                  >
+                    {stock.swingView.label}
+                  </div>
+                  {stock.actionableEntryQuality?.label && (
+                    <div className={`entry-quality-badge ${getActionableToneClass(stock.actionableEntryQuality)}`}>
+                      {stock.actionableEntryQuality.label}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -203,6 +223,15 @@ const SwingStocksList = () => {
                     {stock.entryReason?.replace(/\s+/g, ' ').trim()}
                   </span>
                 </div>
+
+                {stock.actionableEntryQuality?.reason && (
+                  <div className="metric-row entry-quality-row">
+                    <span className="metric-label">Actionable View:</span>
+                    <span className={`metric-value entry-quality-text ${getActionableToneClass(stock.actionableEntryQuality)}`}>
+                      {stock.actionableEntryQuality.reason}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="stock-reasons">
