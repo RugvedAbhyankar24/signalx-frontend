@@ -201,11 +201,11 @@ export default function StockCard({ item }) {
     </div>
   )}
 </div>
-<div className="section">
-  <div className="section-title">🎢 Swing / Long Term View</div>
+      <div className="section opportunity-section">
+  <div className="section-title">🎯 Opportunity Views</div>
 
-  <div className="kv">
-    <span>Intraday Opportunity</span>
+  <div className="kv opportunity-header-row">
+    <span>Intraday Execution</span>
     <span className={`pill ${item.intradayOpportunity?.qualifies ? 'pill-success' : 'pill-muted'}`}>
       {item.intradayOpportunity?.qualifies ? item.intradayView?.label : 'Not Qualified'}
     </span>
@@ -220,56 +220,64 @@ export default function StockCard({ item }) {
       <div className="kv"><span>Plan</span><span className="muted">{item.intradayOpportunity?.entryReason}</span></div>
     </>
   ) : (
-    <div className="inline-reasons">
+    <div className="inline-reasons compact-reasons">
       <div>• {item.intradayOpportunity?.reason || 'No intraday edge right now'}</div>
     </div>
   )}
 
-  <div className="kv">
-    <span>Swing</span>
+  <div className="kv opportunity-header-row">
+    <span>Swing Thesis</span>
     <span className="pill pill-info">
       {item.swingView?.label}
     </span>
   </div>
 
   {item.swingView?.reasons && (
-    <div className="inline-reasons">
+    <div className="inline-reasons compact-reasons">
       {item.swingView.reasons.map((r, i) => (
         <div key={i}>• {r}</div>
       ))}
     </div>
   )}
 
-  <div className="kv">
-    <span>Swing Opportunity</span>
+  <div className="kv opportunity-header-row">
+    <span>Swing Execution</span>
     <span className={`pill ${item.swingOpportunity?.qualifies ? 'pill-success' : 'pill-muted'}`}>
       {item.swingOpportunity?.qualifies ? item.swingOpportunity?.actionableEntryQuality?.label || 'Qualified' : 'Not Qualified'}
     </span>
   </div>
 
   {item.swingOpportunity?.qualifies ? (
-    <>
-      <div className="kv"><span>Swing Action</span><span className={`entry-quality-text ${getActionableToneClass(item.swingOpportunity?.actionableEntryQuality)}`}>{item.swingOpportunity?.actionableEntryQuality?.label || '—'}</span></div>
+    <div className="opportunity-detail-block">
       <div className="kv"><span>Entry / SL</span><span>{formatPrice(item.swingOpportunity?.entryPrice)} / {formatPrice(item.swingOpportunity?.stopLoss)}</span></div>
       <div className="kv"><span>T1 / T2</span><span>{formatPrice(item.swingOpportunity?.target1)} / {formatPrice(item.swingOpportunity?.target2)}</span></div>
       <div className="kv"><span>RR</span><span>{item.swingOpportunity?.riskReward || '—'}</span></div>
-      <div className="kv"><span>Plan</span><span className="muted">{item.swingOpportunity?.entryReason}</span></div>
-    </>
+      <div className="kv"><span>Plan</span><span className="muted value-note">{item.swingOpportunity?.entryReason}</span></div>
+    </div>
   ) : (
-    <div className="inline-reasons">
+    <div className="inline-reasons compact-reasons">
       <div>• {item.swingOpportunity?.reason || 'No swing edge right now'}</div>
     </div>
   )}
 
-  <div className="kv">
-    <span>Long Term</span>
+  {item.swingOpportunity?.qualifies && item.swingOpportunity?.actionableEntryQuality?.reason && (
+    <div className={`execution-note-card ${getActionableToneClass(item.swingOpportunity?.actionableEntryQuality)}`}>
+      <div className="execution-note-label">Execution Note</div>
+      <div className="execution-note-copy">
+        {item.swingOpportunity.actionableEntryQuality.reason}
+      </div>
+    </div>
+  )}
+
+  <div className="kv opportunity-header-row">
+    <span>Long-Term Thesis</span>
     <span className="pill pill-info">
       {item.longTermView?.label}
     </span>
   </div>
 
   {item.longTermView?.reasons && (
-    <div className="inline-reasons">
+    <div className="inline-reasons compact-reasons">
       {item.longTermView.reasons.map((r, i) => (
         <div key={i}>• {r}</div>
       ))}
