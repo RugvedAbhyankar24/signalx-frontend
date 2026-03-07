@@ -1,6 +1,11 @@
 import React from 'react'
 
 export default function StockCard({ item }) {
+  const formatPrice = (value) => {
+    const n = Number(value)
+    return Number.isFinite(n) ? `₹${n.toFixed(2)}` : '—'
+  }
+
   const fmtCap = (v) => {
     if (v == null) return '—'
     const abs = Math.abs(v)
@@ -49,6 +54,19 @@ export default function StockCard({ item }) {
       : item.decision?.label === 'Avoid'
       ? '#ef4444'
       : '#f59e0b'
+
+  const getActionableToneClass = (quality) => {
+    switch (quality?.tone) {
+      case 'positive':
+        return 'entry-quality-positive'
+      case 'neutral':
+        return 'entry-quality-neutral'
+      case 'negative':
+        return 'entry-quality-negative'
+      default:
+        return 'entry-quality-neutral'
+    }
+  }
 
   return (
     <div className="card center-card">
@@ -187,6 +205,27 @@ export default function StockCard({ item }) {
   <div className="section-title">🎢 Swing / Long Term View</div>
 
   <div className="kv">
+    <span>Intraday Opportunity</span>
+    <span className={`pill ${item.intradayOpportunity?.qualifies ? 'pill-success' : 'pill-muted'}`}>
+      {item.intradayOpportunity?.qualifies ? item.intradayView?.label : 'Not Qualified'}
+    </span>
+  </div>
+
+  {item.intradayOpportunity?.qualifies ? (
+    <>
+      <div className="kv"><span>Intraday Action</span><span className={`entry-quality-text ${getActionableToneClass(item.intradayOpportunity?.actionableEntryQuality)}`}>{item.intradayOpportunity?.actionableEntryQuality?.label || '—'}</span></div>
+      <div className="kv"><span>Entry / SL</span><span>{formatPrice(item.intradayOpportunity?.entryPrice)} / {formatPrice(item.intradayOpportunity?.stopLoss)}</span></div>
+      <div className="kv"><span>T1 / T2</span><span>{formatPrice(item.intradayOpportunity?.target1)} / {formatPrice(item.intradayOpportunity?.target2)}</span></div>
+      <div className="kv"><span>RR</span><span>{item.intradayOpportunity?.riskReward || '—'}</span></div>
+      <div className="kv"><span>Plan</span><span className="muted">{item.intradayOpportunity?.entryReason}</span></div>
+    </>
+  ) : (
+    <div className="inline-reasons">
+      <div>• {item.intradayOpportunity?.reason || 'No intraday edge right now'}</div>
+    </div>
+  )}
+
+  <div className="kv">
     <span>Swing</span>
     <span className="pill pill-info">
       {item.swingView?.label}
@@ -198,6 +237,27 @@ export default function StockCard({ item }) {
       {item.swingView.reasons.map((r, i) => (
         <div key={i}>• {r}</div>
       ))}
+    </div>
+  )}
+
+  <div className="kv">
+    <span>Swing Opportunity</span>
+    <span className={`pill ${item.swingOpportunity?.qualifies ? 'pill-success' : 'pill-muted'}`}>
+      {item.swingOpportunity?.qualifies ? item.swingOpportunity?.actionableEntryQuality?.label || 'Qualified' : 'Not Qualified'}
+    </span>
+  </div>
+
+  {item.swingOpportunity?.qualifies ? (
+    <>
+      <div className="kv"><span>Swing Action</span><span className={`entry-quality-text ${getActionableToneClass(item.swingOpportunity?.actionableEntryQuality)}`}>{item.swingOpportunity?.actionableEntryQuality?.label || '—'}</span></div>
+      <div className="kv"><span>Entry / SL</span><span>{formatPrice(item.swingOpportunity?.entryPrice)} / {formatPrice(item.swingOpportunity?.stopLoss)}</span></div>
+      <div className="kv"><span>T1 / T2</span><span>{formatPrice(item.swingOpportunity?.target1)} / {formatPrice(item.swingOpportunity?.target2)}</span></div>
+      <div className="kv"><span>RR</span><span>{item.swingOpportunity?.riskReward || '—'}</span></div>
+      <div className="kv"><span>Plan</span><span className="muted">{item.swingOpportunity?.entryReason}</span></div>
+    </>
+  ) : (
+    <div className="inline-reasons">
+      <div>• {item.swingOpportunity?.reason || 'No swing edge right now'}</div>
     </div>
   )}
 
