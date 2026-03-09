@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import API from './services/api'
 import StockCard from './components/StockCard'
 import MarketTicker from './components/MarketTicker'
@@ -6,6 +6,15 @@ import MarketOverview from './components/MarketOverview'
 import IntradayStocksList from './components/IntradayStocksList'
 import SwingStocksList from './components/SwingStocksList'
 import CollapsibleSection from './components/CollapsibleSection'
+import PaperTradeModal from './components/PaperTradeModal'
+import PaperTradesPanel from './components/PaperTradesPanel'
+import {
+  createPaperTrade,
+  loadPaperTrades,
+  manuallyCloseTrade,
+  savePaperTrades,
+  updateTradesWithQuotes,
+} from './utils/paperTrading'
 
 const NSE_SUGGESTIONS = [
   { symbol: 'RELIANCE', name: 'Reliance Industries Ltd' },
@@ -96,7 +105,11 @@ export default function App() {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [marketLive, setMarketLive] = useState(isMarketOpen())
   const [lastUpdated, setLastUpdated] = useState(null)
+  const [paperTrades, setPaperTrades] = useState(() => loadPaperTrades())
+  const [paperTradeDraft, setPaperTradeDraft] = useState(null)
+  const [toast, setToast] = useState('')
   const autoRefreshRef = useRef(null)
+  const paperQuotesRefreshRef = useRef(null)
 
   useEffect(() => {
     const i = setInterval(() => {
@@ -105,6 +118,16 @@ export default function App() {
     return () => clearInterval(i)
   }, [])
 
+  useEffect(() => {
+    savePaperTrades(paperTrades)
+  }, [paperTrades])
+
+  useEffect(() => {
+    if (!toast) return
+    const timeoutId = setTimeout(() => setToast(''), 2400)
+    return () => clearTimeout(timeoutId)
+  }, [toast])
+
   const filteredSuggestions = NSE_SUGGESTIONS.filter(
     s =>
       symbolsInput &&
@@ -112,7 +135,7 @@ export default function App() {
         s.name.toLowerCase().includes(symbolsInput.toLowerCase()))
   )
 
-  const runScan = async () => {
+  const runScan = useCallback(async () => {
     const symbolToScan = selectedSymbol || symbolsInput.trim()
     if (!symbolToScan) return
 
@@ -133,14 +156,121 @@ export default function App() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedSymbol, symbolsInput])
 
   useEffect(() => {
     if (!marketLive || !symbolsInput.trim()) return
     autoRefreshRef.current = setInterval(runScan, 60000)
     return () => clearInterval(autoRefreshRef.current)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [marketLive, symbolsInput])
+  }, [marketLive, runScan, symbolsInput])
+
+  const syncTradePrices = useCallback((items = []) => {
+    if (!Array.isArray(items) || items.length === 0) return
+
+    const quotes = items.reduce((acc, item) => {
+      if (item?.symbol && item?.currentPrice != null) {
+        acc[item.symbol] = item.currentPrice
+      }
+      return acc
+    }, {})
+
+    if (Object.keys(quotes).length === 0) return
+
+    setPaperTrades((current) => updateTradesWithQuotes(current, quotes))
+  }, [])
+
+  const refreshPaperTradeQuotes = useCallback(async () => {
+    const openSymbols = Array.from(
+      new Set(
+        paperTrades
+          .filter((trade) => !String(trade.status).startsWith('closed'))
+          .map((trade) => trade.symbol)
+          .filter(Boolean)
+      )
+    )
+
+    if (!marketLive || openSymbols.length === 0) return
+
+    try {
+      const response = await API.scan({
+        symbols: openSymbols.slice(0, 25),
+        gapThreshold: 0.8,
+        rsiPeriod: 14,
+      })
+      syncTradePrices(response.data?.results || [])
+    } catch (error) {
+      console.error('Paper trade quote refresh error:', error)
+    }
+  }, [marketLive, paperTrades, syncTradePrices])
+
+  useEffect(() => {
+    if (!marketLive) {
+      if (paperQuotesRefreshRef.current) {
+        clearInterval(paperQuotesRefreshRef.current)
+      }
+      return
+    }
+
+    const hasOpenTrades = paperTrades.some(
+      (trade) => !String(trade.status).startsWith('closed')
+    )
+    if (!hasOpenTrades) return
+
+    refreshPaperTradeQuotes()
+    paperQuotesRefreshRef.current = setInterval(refreshPaperTradeQuotes, 30000)
+    return () => clearInterval(paperQuotesRefreshRef.current)
+  }, [marketLive, paperTrades, refreshPaperTradeQuotes])
+
+  useEffect(() => {
+    syncTradePrices(data)
+  }, [data, syncTradePrices])
+
+  const openPaperTrade = (draft) => {
+    setPaperTradeDraft(draft)
+  }
+
+  const confirmPaperTrade = ({ signal, capital, riskPercent, quantity }) => {
+    const trade = createPaperTrade({
+      signal,
+      capital,
+      riskPercent,
+      quantity,
+    })
+
+    setPaperTrades((current) => [trade, ...current])
+    setPaperTradeDraft(null)
+  }
+
+  const closePaperTrade = (tradeId) => {
+    setPaperTrades((current) =>
+      current.map((trade) =>
+        trade.id === tradeId ? manuallyCloseTrade(trade) : trade
+      )
+    )
+    setToast('Trade moved to closed trades')
+  }
+
+  const deletePaperTrade = (tradeId) => {
+    const trade = paperTrades.find((item) => item.id === tradeId)
+    setPaperTrades((current) => current.filter((trade) => trade.id !== tradeId))
+    if (trade) {
+      setToast(`${trade.symbol} deleted from history`)
+    } else {
+      setToast('Trade deleted')
+    }
+  }
+
+  const clearClosedPaperTrades = () => {
+    const removed = paperTrades.filter((trade) =>
+      String(trade.status).startsWith('closed')
+    ).length
+    setPaperTrades((current) =>
+      current.filter((trade) => !String(trade.status).startsWith('closed'))
+    )
+    if (removed > 0) {
+      setToast(`Cleared ${removed} closed trade${removed > 1 ? 's' : ''}`)
+    }
+  }
 
   const SkeletonCard = () => (
   <div className="skeleton-card">
@@ -281,18 +411,28 @@ export default function App() {
             ) : data.length > 0 ? (
               <div className="result-grid">
                 {data.map((item, index) => (
-                  <StockCard key={item?.symbol || index} item={item} />
+                  <StockCard
+                    key={item?.symbol || index}
+                    item={item}
+                    onPaperTrade={openPaperTrade}
+                  />
                 ))}
               </div>
             ) : null}
           </div>
 
           <CollapsibleSection title="🔥 Intraday Positive Stocks" defaultCollapsed={true}>
-            <IntradayStocksList />
+            <IntradayStocksList
+              onPaperTrade={openPaperTrade}
+              onPriceUpdate={syncTradePrices}
+            />
           </CollapsibleSection>
 
           <CollapsibleSection title="🔥 Swing Trading Opportunities" defaultCollapsed={true}>
-            <SwingStocksList />
+            <SwingStocksList
+              onPaperTrade={openPaperTrade}
+              onPriceUpdate={syncTradePrices}
+            />
           </CollapsibleSection>
 
         </div>
@@ -300,11 +440,33 @@ export default function App() {
         {/* RIGHT PANEL */}
         <div className="right-panel">
           <MarketOverview />
+          <PaperTradesPanel
+            trades={paperTrades}
+            onCloseTrade={closePaperTrade}
+            onDeleteTrade={deletePaperTrade}
+            onClearClosedTrades={clearClosedPaperTrades}
+            marketLive={marketLive}
+          />
         </div>
 
       </div>
 
       <MarketTicker />
+
+      {paperTradeDraft && (
+        <PaperTradeModal
+          key={`${paperTradeDraft.symbol}-${paperTradeDraft.mode}-${paperTradeDraft.source}-${paperTradeDraft.entryPrice}-${paperTradeDraft.stopLoss}-${paperTradeDraft.target1}-${paperTradeDraft.target2}`}
+          draft={paperTradeDraft}
+          onClose={() => setPaperTradeDraft(null)}
+          onConfirm={confirmPaperTrade}
+        />
+      )}
+
+      {toast && (
+        <div className="app-toast" role="status" aria-live="polite">
+          {toast}
+        </div>
+      )}
 
       <div className="footer">
         <div className="footer-content">

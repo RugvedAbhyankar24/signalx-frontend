@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import API from '../services/api'
 
-const IntradayStocksList = () => {
+const IntradayStocksList = ({ onPaperTrade, onPriceUpdate }) => {
   const [stocks, setStocks] = useState([])
   const [loading, setLoading] = useState(false)
   const [lastUpdated, setLastUpdated] = useState(null)
   const [error, setError] = useState(null)
 
-  const fetchIntradayStocks = async () => {
+  const fetchIntradayStocks = useCallback(async () => {
     setLoading(true)
     setError(null)
     
     try {
       const response = await API.getIntradayPositiveStocks()
-      setStocks(response.data.positiveStocks || [])
+      const nextStocks = response.data.positiveStocks || []
+      setStocks(nextStocks)
+      onPriceUpdate?.(nextStocks)
       setLastUpdated(new Date())
     } catch (err) {
       console.error('Error fetching intraday stocks:', err)
@@ -22,7 +24,7 @@ const IntradayStocksList = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [onPriceUpdate])
 
   useEffect(() => {
     fetchIntradayStocks()
@@ -30,7 +32,7 @@ const IntradayStocksList = () => {
     // Auto-refresh every 30 seconds (NSE API rate limit protection)
     const interval = setInterval(fetchIntradayStocks, 30000)
     return () => clearInterval(interval)
-  }, [])
+  }, [fetchIntradayStocks])
 
   const formatMarketCap = (marketCap) => {
     if (!marketCap) return 'N/A'
@@ -74,6 +76,60 @@ const IntradayStocksList = () => {
         return 'entry-quality-negative'
       default:
         return 'entry-quality-neutral'
+    }
+  }
+
+  const buildModePresets = (stock) => {
+    const currentPrice = Number(stock.currentPrice) || 0
+    const support = Number(stock.support)
+    const resistance = Number(stock.resistance)
+    const manualStop = currentPrice ? currentPrice * 0.97 : 0
+    const manualTarget1 = currentPrice ? currentPrice * 1.03 : 0
+    const manualTarget2 = currentPrice ? currentPrice * 1.06 : 0
+    const swingStop = currentPrice ? currentPrice * 0.955 : 0
+    const swingTarget1 = currentPrice ? currentPrice * 1.04 : 0
+    const swingTarget2 = currentPrice ? currentPrice * 1.08 : 0
+
+    return {
+      custom: {
+        mode: 'custom',
+        tradeOrigin: 'custom',
+        setupLabel: stock.intradayView?.label || 'Manual Sandbox Trade',
+        executionLabel: 'Manual paper trade',
+        entryPrice: currentPrice,
+        stopLoss: Number.isFinite(support) && support > 0 && support < currentPrice ? support : manualStop,
+        target1: Number.isFinite(resistance) && resistance > currentPrice ? resistance : manualTarget1,
+        target2: Number.isFinite(resistance) && resistance > currentPrice ? resistance * 1.03 : manualTarget2,
+        planReason: 'Manual paper trade seeded from stock scan levels. You can edit entry, stop, and targets in the simulator.',
+        executionReason: stock.actionableEntryQuality?.reason || 'Use this sandbox to test both profit-making and loss-making trade plans.',
+        riskReward: '—',
+      },
+      intraday: {
+        mode: 'intraday',
+        tradeOrigin: 'system_plan',
+        setupLabel: stock.intradayView?.label || 'Intraday setup',
+        executionLabel: stock.actionableEntryQuality?.label || 'Qualified',
+        entryPrice: stock.entryPrice,
+        stopLoss: stock.stopLoss,
+        target1: stock.target1,
+        target2: stock.target2,
+        planReason: stock.entryReason,
+        executionReason: stock.actionableEntryQuality?.reason,
+        riskReward: stock.riskReward,
+      },
+      swing: {
+        mode: 'swing',
+        tradeOrigin: 'custom',
+        setupLabel: 'Swing preset unavailable in Intraday list',
+        executionLabel: 'Manual review',
+        entryPrice: currentPrice,
+        stopLoss: Number.isFinite(support) && support > 0 && support < currentPrice ? support : swingStop,
+        target1: Number.isFinite(resistance) && resistance > currentPrice ? resistance : swingTarget1,
+        target2: Number.isFinite(resistance) && resistance > currentPrice ? resistance * 1.04 : swingTarget2,
+        planReason: 'Swing system plan is not part of this intraday payload. Levels are seeded from current structure.',
+        executionReason: 'Confirm swing thesis from Swing tab before taking a system-driven swing trade.',
+        riskReward: '—',
+      },
     }
   }
 
@@ -153,6 +209,37 @@ const IntradayStocksList = () => {
                 <div className="metric-row entry-price">
                   <span className="metric-label">Entry Price:</span>
                   <span className="metric-value entry-price-value">{formatPrice(stock.entryPrice)}</span>
+                </div>
+
+                <div className="metric-row metric-row-action">
+                  <span className="metric-label">Simulator:</span>
+                  <button
+                    className="paper-trade-btn"
+                    onClick={() => {
+                      const modePresets = buildModePresets(stock)
+                      const selectedPreset = modePresets.intraday
+                      onPaperTrade?.({
+                        symbol: stock.symbol,
+                        companyName: stock.companyName,
+                        mode: 'intraday',
+                        tradeOrigin: selectedPreset.tradeOrigin,
+                        setupLabel: selectedPreset.setupLabel,
+                        executionLabel: selectedPreset.executionLabel,
+                        entryPrice: selectedPreset.entryPrice,
+                        stopLoss: selectedPreset.stopLoss,
+                        target1: selectedPreset.target1,
+                        target2: selectedPreset.target2,
+                        currentPrice: stock.currentPrice,
+                        planReason: selectedPreset.planReason,
+                        executionReason: selectedPreset.executionReason,
+                        riskReward: selectedPreset.riskReward,
+                        modePresets,
+                        source: 'intraday_tab',
+                      })
+                    }}
+                  >
+                    Use Intraday Plan
+                  </button>
                 </div>
 
                 <div className="metric-row">
