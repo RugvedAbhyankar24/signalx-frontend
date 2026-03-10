@@ -98,8 +98,8 @@ export default function PaperTradesPanel({
           <h3>Paper Trading Sandbox</h3>
           <p>
             {marketLive
-              ? 'Live mark-to-market using the latest SignalX scan prices.'
-              : 'Market closed. PnL is frozen at the last scanned price until a fresh quote comes in.'}
+              ? 'Live mark-to-market using latest available prices.'
+              : 'Market closed. PnL is frozen at the last market price until a fresh quote comes in.'}
           </p>
         </div>
         <span className={`paper-market-state ${marketLive ? 'market-live' : 'market-frozen'}`}>
@@ -154,7 +154,7 @@ export default function PaperTradesPanel({
 
               <div className="paper-trade-freeze-note">
                 {marketLive
-                  ? `Marked live from latest scan`
+                  ? `Marked live from latest quote`
                   : `Frozen at ${formatStamp(trade.lastUpdated)}`}
               </div>
 

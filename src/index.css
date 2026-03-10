@@ -832,8 +832,8 @@ button:disabled {
 .paper-trades-panel {
   background: linear-gradient(
     180deg,
-    rgba(15, 23, 42, 0.92),
-    rgba(4, 12, 24, 0.94)
+    rgba(15,23,42,0.9),
+    rgba(2,6,23,0.9)
   );
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;
@@ -841,6 +841,10 @@ button:disabled {
   box-shadow:
     0 0 0 1px rgba(148, 163, 184, 0.08),
     0 20px 40px rgba(0, 0, 0, 0.35);
+}
+
+.paper-trades-panel::before {
+  opacity: 0.72;
 }
 
 .paper-trades-header h3 {
@@ -856,15 +860,16 @@ button:disabled {
 }
 
 .paper-trades-header p {
-  margin: 6px 0 0;
+  margin: 8px 0 0;
   font-size: 12px;
   color: var(--muted);
   line-height: 1.45;
+  max-width: 240px;
 }
 
 .paper-market-state {
   flex-shrink: 0;
-  padding: 6px 10px;
+  padding: 5px 10px;
   border-radius: 999px;
   font-size: 10px;
   font-weight: 800;
@@ -888,15 +893,17 @@ button:disabled {
 .paper-trades-summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 14px;
+  gap: 12px;
+  margin-top: 18px;
 }
 
 .paper-summary-tile {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 12px;
-  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(111, 181, 238, 0.2);
+  background: linear-gradient(160deg, rgba(17, 38, 66, 0.88), rgba(10, 24, 44, 0.88));
+  box-shadow: inset 0 1px 0 rgba(183, 226, 255, 0.1), 0 10px 26px rgba(2, 8, 20, 0.35);
+  padding: 14px 16px;
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
 }
 
 .paper-summary-tile span {
@@ -907,15 +914,17 @@ button:disabled {
 
 .paper-summary-tile strong {
   display: block;
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 16px;
 }
 
 .paper-trades-empty {
   margin-top: 14px;
   padding: 14px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.04);
+  border-radius: 14px;
+  border: 1px solid rgba(111, 181, 238, 0.2);
+  background: linear-gradient(160deg, rgba(17, 38, 66, 0.88), rgba(10, 24, 44, 0.88));
+  box-shadow: inset 0 1px 0 rgba(183, 226, 255, 0.1), 0 10px 26px rgba(2, 8, 20, 0.35);
   color: var(--muted);
   font-size: 13px;
   line-height: 1.5;
@@ -924,15 +933,17 @@ button:disabled {
 .paper-trade-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 14px;
+  gap: 14px;
+  margin-top: 18px;
 }
 
 .paper-trade-card {
-  padding: 14px;
+  padding: 18px;
   border-radius: 14px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(111, 181, 238, 0.2);
+  background: linear-gradient(160deg, rgba(17, 38, 66, 0.88), rgba(10, 24, 44, 0.88));
+  box-shadow: inset 0 1px 0 rgba(183, 226, 255, 0.1), 0 10px 26px rgba(2, 8, 20, 0.35);
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
 }
 
 .paper-trade-card.closed {
@@ -964,15 +975,15 @@ button:disabled {
 }
 
 .origin-system {
-  color: #93c5fd;
-  background: rgba(37, 99, 235, 0.16);
-  border-color: rgba(59, 130, 246, 0.24);
+  color: #a5d8ff;
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(59, 130, 246, 0.18);
 }
 
 .origin-custom {
   color: #bfdbfe;
-  background: rgba(71, 85, 105, 0.24);
-  border-color: rgba(148, 163, 184, 0.2);
+  background: rgba(71, 85, 105, 0.18);
+  border-color: rgba(148, 163, 184, 0.16);
 }
 
 .paper-trade-symbol {
@@ -991,7 +1002,7 @@ button:disabled {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 12px;
   font-size: 11px;
 }
 
@@ -1002,13 +1013,13 @@ button:disabled {
 }
 
 .paper-trade-freeze-note {
-  margin-top: 10px;
+  margin-top: 14px;
   font-size: 11px;
   color: #94a3b8;
 }
 
 .paper-trade-quote-age {
-  margin-top: 4px;
+  margin-top: 6px;
   font-size: 11px;
   color: #7c8ea8;
 }
@@ -1045,19 +1056,20 @@ button:disabled {
 .paper-trade-plan {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px 12px;
-  margin-top: 12px;
+  gap: 10px 12px;
+  margin-top: 16px;
 }
 
 .paper-stat-tile,
 .paper-plan-tile {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(148, 163, 184, 0.1);
-  border-radius: 12px;
-  padding: 12px;
+  background: linear-gradient(160deg, rgba(17, 38, 66, 0.88), rgba(10, 24, 44, 0.88));
+  border: 1px solid rgba(111, 181, 238, 0.18);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(183, 226, 255, 0.08), 0 8px 18px rgba(2, 8, 20, 0.28);
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .paper-stat-tile span,
@@ -1072,14 +1084,14 @@ button:disabled {
 }
 
 .paper-trade-plan-note {
-  margin-top: 12px;
+  margin-top: 16px;
   font-size: 12px;
   color: #c6d2ea;
   line-height: 1.5;
 }
 
 .paper-trade-note {
-  margin-top: 12px;
+  margin-top: 16px;
   padding: 10px 12px;
   border-radius: 12px;
   background: rgba(120, 53, 15, 0.14);
@@ -1091,7 +1103,7 @@ button:disabled {
 
 .paper-close-btn {
   width: 100%;
-  margin-top: 12px;
+  margin-top: 16px;
 }
 
 .paper-trades-closed {
@@ -1130,8 +1142,11 @@ button:disabled {
 .paper-trade-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(2, 6, 23, 0.72);
-  backdrop-filter: blur(8px);
+  background:
+    radial-gradient(1200px 520px at 8% -10%, rgba(0, 199, 255, 0.16), transparent 70%),
+    radial-gradient(900px 430px at 96% 8%, rgba(0, 247, 184, 0.1), transparent 74%),
+    rgba(7, 19, 36, 0.78);
+  backdrop-filter: blur(12px);
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -1142,14 +1157,42 @@ button:disabled {
 
 .paper-trade-modal {
   width: min(720px, 100%);
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(5, 14, 28, 0.98));
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: 20px;
-  padding: 22px;
-  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.45);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: linear-gradient(165deg, var(--mass-surface-a), var(--mass-surface-b));
+  border: 1px solid var(--mass-edge);
+  box-shadow:
+    var(--mass-glow),
+    var(--mass-shadow-hard);
+  border-radius: 22px;
+  padding: 24px;
   max-height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
+  transition:
+    transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 260ms ease;
+}
+
+.paper-trade-modal::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 42%;
+  background: linear-gradient(
+    180deg,
+    var(--mass-highlight) 0%,
+    rgba(255, 255, 255, 0) 88%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.paper-trade-modal > * {
+  position: relative;
+  z-index: 1;
 }
 
 .paper-trade-modal-header {
@@ -1157,11 +1200,14 @@ button:disabled {
   justify-content: space-between;
   gap: 18px;
   align-items: flex-start;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(122, 168, 205, 0.16);
 }
 
 .paper-trade-modal-header h3 {
   margin: 4px 0 0;
   font-size: 22px;
+  letter-spacing: -0.02em;
 }
 
 .paper-trade-modal-header p {
@@ -1172,7 +1218,7 @@ button:disabled {
 
 .paper-trade-modal-body {
   overflow-y: auto;
-  padding-right: 4px;
+  padding: 18px 4px 0 0;
   margin-right: -4px;
 }
 
@@ -1181,31 +1227,49 @@ button:disabled {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #86efac;
+  font-weight: 700;
 }
 
 .paper-modal-close {
   width: auto;
-  min-width: 44px;
-  padding: 8px 12px;
+  min-width: 46px;
+  min-height: 46px;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(98, 181, 255, 0.3);
+  background: linear-gradient(160deg, rgba(17, 38, 66, 0.88), rgba(10, 24, 44, 0.88));
+  box-shadow:
+    inset 0 1px 0 rgba(183, 226, 255, 0.1),
+    0 10px 26px rgba(2, 8, 20, 0.35);
+  color: #dbeafe;
   font-size: 24px;
   line-height: 1;
+}
+
+.paper-modal-close:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(183, 226, 255, 0.16),
+    0 18px 34px rgba(2, 8, 20, 0.44);
 }
 
 .paper-trade-modal-grid {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   gap: 18px;
-  margin-top: 18px;
   align-items: start;
 }
 
 .paper-trade-summary,
 .paper-trade-form,
 .paper-sizing-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 14px;
-  padding: 14px;
+  border: 1px solid rgba(111, 181, 238, 0.2);
+  background: linear-gradient(160deg, rgba(17, 38, 66, 0.88), rgba(10, 24, 44, 0.88));
+  box-shadow:
+    inset 0 1px 0 rgba(183, 226, 255, 0.1),
+    0 10px 26px rgba(2, 8, 20, 0.35);
+  padding: 16px;
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
 }
 
 .paper-summary-row {
@@ -1213,8 +1277,14 @@ button:disabled {
   justify-content: space-between;
   gap: 10px;
   font-size: 13px;
-  padding: 7px 0;
+  padding: 9px 0;
   align-items: flex-start;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.paper-summary-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
 }
 
 .paper-summary-row span:first-child {
@@ -1232,7 +1302,7 @@ button:disabled {
 .paper-trade-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   align-self: start;
 }
 
@@ -1264,8 +1334,9 @@ button:disabled {
   align-items: flex-start;
   padding: 12px 14px;
   border-radius: 14px;
-  background: rgba(148, 163, 184, 0.08);
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: linear-gradient(160deg, rgba(17, 38, 66, 0.72), rgba(10, 24, 44, 0.82));
+  border: 1px solid rgba(111, 181, 238, 0.18);
+  box-shadow: inset 0 1px 0 rgba(183, 226, 255, 0.06);
 }
 
 .paper-override-copy {
@@ -1293,17 +1364,21 @@ button:disabled {
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
-  background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
-  box-shadow: none;
+  background: linear-gradient(160deg, rgba(17, 38, 66, 0.88), rgba(10, 24, 44, 0.88));
+  border: 1px solid rgba(111, 181, 238, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(183, 226, 255, 0.1),
+    0 10px 26px rgba(2, 8, 20, 0.25);
 }
 
 .paper-override-btn:hover {
   transform: none;
-  box-shadow: none;
+  box-shadow: inset 0 1px 0 rgba(191, 219, 254, 0.08);
 }
 
 .paper-override-btn-active {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(37, 99, 235, 0.9));
+  border-color: rgba(147, 197, 253, 0.42);
 }
 
 .paper-sizing-card {
@@ -1323,10 +1398,13 @@ button:disabled {
 
 .paper-trade-notes {
   margin-top: 18px;
-  padding: 14px;
+  padding: 16px;
   border-radius: 14px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: linear-gradient(160deg, rgba(17, 38, 66, 0.88), rgba(10, 24, 44, 0.88));
+  border: 1px solid rgba(111, 181, 238, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(183, 226, 255, 0.1),
+    0 10px 26px rgba(2, 8, 20, 0.35);
 }
 
 .paper-trade-notes p {
@@ -1345,6 +1423,8 @@ button:disabled {
   justify-content: flex-end;
   gap: 12px;
   margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(122, 168, 205, 0.16);
 }
 
 .app-toast {
@@ -1376,7 +1456,38 @@ button:disabled {
 }
 
 .paper-secondary-btn {
-  background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+  background: linear-gradient(160deg, rgba(17, 38, 66, 0.88), rgba(10, 24, 44, 0.88));
+  border: 1px solid rgba(111, 181, 238, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(183, 226, 255, 0.1),
+    0 10px 26px rgba(2, 8, 20, 0.35);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .paper-trade-modal:hover {
+    transform: translateY(-8px) scale(1.01);
+    border-color: rgba(127, 215, 255, 0.5);
+    box-shadow: var(--mass-glow), var(--mass-shadow-hard);
+  }
+
+  .paper-trade-modal:hover::before {
+    background: linear-gradient(
+      180deg,
+      rgba(190, 232, 255, 0.26) 0%,
+      rgba(255, 255, 255, 0) 92%
+    );
+  }
+
+  .paper-trade-summary:hover,
+  .paper-trade-form:hover,
+  .paper-sizing-card:hover,
+  .paper-trade-notes:hover {
+    transform: translateY(-4px);
+    border-color: rgba(130, 214, 255, 0.45);
+    box-shadow:
+      inset 0 1px 0 rgba(183, 226, 255, 0.16),
+      0 18px 34px rgba(2, 8, 20, 0.44);
+  }
 }
 
 .paper-trade-btn {
@@ -2692,20 +2803,27 @@ body {
 .intraday-stock-card,
 .swing-stock-card,
 .market-panel,
+.paper-trades-panel,
 .index-card,
-.collapsible-section,
+.collapsible-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
 .search-box,
 .search-wrapper {
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .card,
 .intraday-stock-card,
 .swing-stock-card,
 .collapsible-section,
-.market-panel {
+.market-panel,
+.paper-trades-panel {
   background: linear-gradient(165deg, var(--mass-surface-a), var(--mass-surface-b));
   border: 1px solid var(--mass-edge);
   box-shadow: var(--mass-glow), var(--mass-shadow-soft);
@@ -2719,7 +2837,8 @@ body {
 .intraday-stock-card::before,
 .swing-stock-card::before,
 .collapsible-section::before,
-.market-panel::before {
+.market-panel::before,
+.paper-trades-panel::before {
   content: '';
   position: absolute;
   inset: 0 0 auto 0;
@@ -2737,7 +2856,8 @@ body {
 .intraday-stock-card > *,
 .swing-stock-card > *,
 .collapsible-section > *,
-.market-panel > * {
+.market-panel > *,
+.paper-trades-panel > * {
   position: relative;
   z-index: 1;
 }
@@ -2747,7 +2867,8 @@ body {
   .intraday-stock-card:hover,
   .swing-stock-card:hover,
   .collapsible-section:hover,
-  .market-panel:hover {
+  .market-panel:hover,
+  .paper-trades-panel:hover {
     transform: translateY(-8px) scale(1.01);
     border-color: rgba(127, 215, 255, 0.5);
     box-shadow: var(--mass-glow), var(--mass-shadow-hard);
@@ -2757,7 +2878,8 @@ body {
   .intraday-stock-card:hover::before,
   .swing-stock-card:hover::before,
   .collapsible-section:hover::before,
-  .market-panel:hover::before {
+  .market-panel:hover::before,
+  .paper-trades-panel:hover::before {
     background: linear-gradient(
       180deg,
       rgba(190, 232, 255, 0.26) 0%,
@@ -2776,6 +2898,16 @@ body {
 
 @media (hover: hover) and (pointer: fine) {
   .index-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(130, 214, 255, 0.45);
+    box-shadow: inset 0 1px 0 rgba(183, 226, 255, 0.16), 0 18px 34px rgba(2, 8, 20, 0.44);
+  }
+
+  .paper-summary-tile:hover,
+  .paper-trades-empty:hover,
+  .paper-trade-card:hover,
+  .paper-stat-tile:hover,
+  .paper-plan-tile:hover {
     transform: translateY(-4px);
     border-color: rgba(130, 214, 255, 0.45);
     box-shadow: inset 0 1px 0 rgba(183, 226, 255, 0.16), 0 18px 34px rgba(2, 8, 20, 0.44);
@@ -2873,7 +3005,8 @@ button,
   .intraday-stock-card:hover,
   .swing-stock-card:hover,
   .collapsible-section:hover,
-  .market-panel:hover {
+  .market-panel:hover,
+  .paper-trades-panel:hover {
     transform: none;
   }
 }

@@ -34,6 +34,20 @@ api.interceptors.response.use(
       console.error('API Error:', error.response.data);
       console.error('Status:', error.response.status);
       console.error('Headers:', error.response.headers);
+      const retryAfterSeconds =
+        Number(error.response.data?.retryAfterSeconds) ||
+        Number(error.response.headers?.['retry-after']) ||
+        null;
+      const serverMessage = error.response.data?.error;
+
+      if (error.response.status === 429) {
+        error.retryAfterSeconds = retryAfterSeconds;
+        error.message = retryAfterSeconds
+          ? `${serverMessage || 'Too many requests.'} Retry in ${retryAfterSeconds}s.`
+          : (serverMessage || 'Too many requests. Please try again later.');
+      } else if (serverMessage) {
+        error.message = serverMessage;
+      }
     } else if (error.request) {
       // The request was made but no response was received
       console.error('No response received:', error.request);
@@ -68,6 +82,9 @@ export default {
 
   // Market indices (NIFTY / BANK NIFTY / SENSEX)
   getMarketIndices: () => api.get('/market/indices'),
+
+  getPaperTradeQuotes: (symbols) =>
+    api.post('/market/quotes', { symbols }, { timeout: 15000 }),
 
   // Intraday positive stocks
   getIntradayPositiveStocks: (symbols) => 

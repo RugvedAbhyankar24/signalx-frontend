@@ -97,6 +97,8 @@ const isMarketOpen = () => {
   return minutes >= 555 && minutes <= 930
 }
 
+const PAPER_TRADE_REFRESH_MS = 5000
+
 export default function App() {
   const [symbolsInput, setSymbolsInput] = useState('')
   const [selectedSymbol, setSelectedSymbol] = useState('')
@@ -110,6 +112,8 @@ export default function App() {
   const [toast, setToast] = useState('')
   const autoRefreshRef = useRef(null)
   const paperQuotesRefreshRef = useRef(null)
+  const scanRequestRef = useRef(false)
+  const paperQuotesRequestRef = useRef(false)
 
   useEffect(() => {
     const i = setInterval(() => {
@@ -134,11 +138,21 @@ export default function App() {
       (s.symbol.includes(symbolsInput.toUpperCase()) ||
         s.name.toLowerCase().includes(symbolsInput.toLowerCase()))
   )
+  const openTradeSymbols = Array.from(
+    new Set(
+      paperTrades
+        .filter((trade) => !String(trade.status).startsWith('closed'))
+        .map((trade) => trade.symbol)
+        .filter(Boolean)
+    )
+  )
+  const openTradeSymbolsKey = openTradeSymbols.join(',')
 
   const runScan = useCallback(async () => {
     const symbolToScan = selectedSymbol || symbolsInput.trim()
-    if (!symbolToScan) return
+    if (!symbolToScan || scanRequestRef.current) return
 
+    scanRequestRef.current = true
     setLoading(true)
     setLastUpdated(new Date())
 
@@ -151,9 +165,10 @@ export default function App() {
       setData(response.data.results || [])
     } catch (e) {
       console.error('Scan error:', e)
-      alert(e.message || 'Scan failed')
+      setToast(e.message || 'Scan failed')
       setData([])
     } finally {
+      scanRequestRef.current = false
       setLoading(false)
     }
   }, [selectedSymbol, symbolsInput])
@@ -180,28 +195,18 @@ export default function App() {
   }, [])
 
   const refreshPaperTradeQuotes = useCallback(async () => {
-    const openSymbols = Array.from(
-      new Set(
-        paperTrades
-          .filter((trade) => !String(trade.status).startsWith('closed'))
-          .map((trade) => trade.symbol)
-          .filter(Boolean)
-      )
-    )
-
-    if (!marketLive || openSymbols.length === 0) return
+    if (!marketLive || openTradeSymbols.length === 0 || paperQuotesRequestRef.current) return
 
     try {
-      const response = await API.scan({
-        symbols: openSymbols.slice(0, 25),
-        gapThreshold: 0.8,
-        rsiPeriod: 14,
-      })
+      paperQuotesRequestRef.current = true
+      const response = await API.getPaperTradeQuotes(openTradeSymbols.slice(0, 25))
       syncTradePrices(response.data?.results || [])
     } catch (error) {
       console.error('Paper trade quote refresh error:', error)
+    } finally {
+      paperQuotesRequestRef.current = false
     }
-  }, [marketLive, paperTrades, syncTradePrices])
+  }, [marketLive, openTradeSymbols, syncTradePrices])
 
   useEffect(() => {
     if (!marketLive) {
@@ -211,15 +216,12 @@ export default function App() {
       return
     }
 
-    const hasOpenTrades = paperTrades.some(
-      (trade) => !String(trade.status).startsWith('closed')
-    )
-    if (!hasOpenTrades) return
+    if (openTradeSymbols.length === 0) return
 
     refreshPaperTradeQuotes()
-    paperQuotesRefreshRef.current = setInterval(refreshPaperTradeQuotes, 30000)
+    paperQuotesRefreshRef.current = setInterval(refreshPaperTradeQuotes, PAPER_TRADE_REFRESH_MS)
     return () => clearInterval(paperQuotesRefreshRef.current)
-  }, [marketLive, paperTrades, refreshPaperTradeQuotes])
+  }, [marketLive, openTradeSymbols.length, openTradeSymbolsKey, refreshPaperTradeQuotes])
 
   useEffect(() => {
     syncTradePrices(data)
