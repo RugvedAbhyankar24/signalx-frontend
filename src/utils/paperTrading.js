@@ -1,8 +1,35 @@
 const STORAGE_KEY = 'signalx-paper-trades-v1'
+const IST_TIMEZONE = 'Asia/Kolkata'
+const INTRADAY_AUTO_SQUARE_OFF_MINUTES = 15 * 60 + 20
 
 const toNumber = (value, fallback = 0) => {
   const n = Number(value)
   return Number.isFinite(n) ? n : fallback
+}
+
+const getISTDateParts = (value = new Date()) => {
+  const date = value instanceof Date ? value : new Date(value)
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: IST_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(date)
+
+  const pick = (type) => parts.find((part) => part.type === type)?.value || ''
+  const year = pick('year')
+  const month = pick('month')
+  const day = pick('day')
+  const hour = Number(pick('hour'))
+  const minute = Number(pick('minute'))
+
+  return {
+    dateKey: `${year}-${month}-${day}`,
+    minutes: hour * 60 + minute,
+  }
 }
 
 export const validateLongTradeLevels = ({ entryPrice, stopLoss, target1, target2 }) => {
@@ -55,18 +82,25 @@ export const derivePaperTradeQuantity = ({
   riskPercent,
   entryPrice,
   stopLoss,
+  mode,
+  leverageMultiplier,
 }) => {
   const capitalValue = Math.max(toNumber(capital), 0)
   const riskValue = Math.max(toNumber(riskPercent), 0)
   const entry = Math.max(toNumber(entryPrice), 0)
   const stop = Math.max(toNumber(stopLoss), 0)
+  const normalizedLeverage = mode === 'intraday'
+    ? Math.max(toNumber(leverageMultiplier, 1), 1)
+    : 1
 
   if (!capitalValue || !entry) {
     return {
       quantity: 0,
       riskPerShare: 0,
       capitalUsed: 0,
+      grossExposure: 0,
       riskAmount: 0,
+      leverageMultiplier: normalizedLeverage,
     }
   }
 
@@ -75,21 +109,29 @@ export const derivePaperTradeQuantity = ({
       quantity: 0,
       riskPerShare: 0,
       capitalUsed: 0,
+      grossExposure: 0,
       riskAmount: 0,
+      leverageMultiplier: normalizedLeverage,
     }
   }
 
   const riskPerShare = Math.max(entry - stop, 0.01)
-  const capitalCappedQty = Math.floor(capitalValue / entry)
-  const riskBudget = capitalValue * (riskValue / 100)
+  const effectiveBuyingPower = capitalValue * normalizedLeverage
+  const capitalCappedQty = Math.floor(effectiveBuyingPower / entry)
+  const riskBudgetBase = mode === 'intraday' ? effectiveBuyingPower : capitalValue
+  const riskBudget = riskBudgetBase * (riskValue / 100)
   const riskCappedQty = riskValue > 0 ? Math.floor(riskBudget / riskPerShare) : capitalCappedQty
   const quantity = Math.max(Math.min(capitalCappedQty, riskCappedQty), 0)
+  const grossExposure = quantity * entry
 
   return {
     quantity,
     riskPerShare,
-    capitalUsed: quantity * entry,
+    capitalUsed: normalizedLeverage > 1 ? grossExposure / normalizedLeverage : grossExposure,
+    grossExposure,
+    leveragedCapital: effectiveBuyingPower,
     riskAmount: quantity * riskPerShare,
+    leverageMultiplier: normalizedLeverage,
   }
 }
 
@@ -182,9 +224,14 @@ export const createPaperTrade = ({ signal, capital, riskPercent, quantity }) => 
     riskPercent,
     entryPrice: entry,
     stopLoss: stop,
+    mode: signal.mode,
+    leverageMultiplier: signal.leverageMultiplier,
   })
   const finalQuantity = Math.max(toNumber(quantity), 0) || derived.quantity
   const createdAt = new Date().toISOString()
+  const leverageMultiplier = Math.max(toNumber(signal.leverageMultiplier, signal.mode === 'intraday' ? 1 : 1), 1)
+  const grossExposure = finalQuantity * entry
+  const capitalUsed = leverageMultiplier > 1 ? grossExposure / leverageMultiplier : grossExposure
 
   const trade = {
     id: `${signal.symbol}-${signal.mode}-${Date.now()}`,
@@ -203,7 +250,9 @@ export const createPaperTrade = ({ signal, capital, riskPercent, quantity }) => 
     quantity: finalQuantity,
     capital: toNumber(capital),
     riskPercent: toNumber(riskPercent),
-    capitalUsed: finalQuantity * entry,
+    leverageMultiplier,
+    capitalUsed,
+    grossExposure,
     plannedRiskAmount: finalQuantity * Math.max(entry - stop, 0.01),
     planReason: signal.planReason || '',
     executionReason: signal.executionReason || '',
@@ -252,4 +301,38 @@ export const manuallyCloseTrade = (trade, closePrice) => {
     closedAt: new Date().toISOString(),
     lastUpdated: new Date().toISOString(),
   }
+}
+
+export const autoSquareOffIntradayTrades = (trades, now = new Date()) => {
+  const { dateKey: currentDateKey, minutes: currentMinutes } = getISTDateParts(now)
+
+  return trades.map((trade) => {
+    if (String(trade.status).startsWith('closed')) return trade
+    if (trade.mode !== 'intraday') return trade
+
+    const { dateKey: tradeDateKey } = getISTDateParts(trade.createdAt || trade.lastUpdated || now)
+    const shouldSquareOff =
+      tradeDateKey < currentDateKey ||
+      (tradeDateKey === currentDateKey && currentMinutes >= INTRADAY_AUTO_SQUARE_OFF_MINUTES)
+
+    if (!shouldSquareOff) return trade
+
+    const finalPrice = toNumber(trade.lastKnownPrice, trade.entryPrice)
+    const entry = toNumber(trade.entryPrice)
+    const quantity = toNumber(trade.quantity)
+    const sign = getTradeDirection(trade) === 'short' ? -1 : 1
+
+    return {
+      ...trade,
+      status: 'closed_auto_squareoff',
+      statusLabel: 'Auto Squared Off',
+      closeReason: 'intraday_auto_squareoff',
+      lastKnownPrice: finalPrice,
+      realizedPnl: (finalPrice - entry) * quantity * sign,
+      unrealizedPnl: 0,
+      unrealizedPct: 0,
+      closedAt: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
+    }
+  })
 }

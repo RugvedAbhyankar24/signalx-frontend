@@ -86,6 +86,9 @@ export default {
   getPaperTradeQuotes: (symbols) =>
     api.post('/market/quotes', { symbols }, { timeout: 15000 }),
 
+  getIntradayLeverage: (symbols) =>
+    api.post('/market/leverage', { symbols }, { timeout: 15000 }),
+
   // Intraday positive stocks
   getIntradayPositiveStocks: (symbols) => 
     api.post('/intraday', { symbols }, { timeout: 60000 }), // 60 seconds for intraday

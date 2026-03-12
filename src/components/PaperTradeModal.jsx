@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import API from '../services/api'
 import { derivePaperTradeQuantity, deriveRiskReward, validateLongTradeLevels } from '../utils/paperTrading'
 
 const roundPriceValue = (value) => {
@@ -23,6 +24,8 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
   const [target1, setTarget1] = useState(roundPriceValue(initialPreset?.target1))
   const [target2, setTarget2] = useState(roundPriceValue(initialPreset?.target2))
   const [validationMessage, setValidationMessage] = useState('')
+  const [leverageMultiplier, setLeverageMultiplier] = useState(mode === 'intraday' ? 1 : 1)
+  const [leverageSource, setLeverageSource] = useState('fallback')
 
   const modePreset = useMemo(() => {
     const presets = draft?.modePresets || {}
@@ -76,7 +79,7 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
 
   const sizing = useMemo(() => {
     if (!draft) {
-      return { quantity: 0, capitalUsed: 0, riskAmount: 0, riskPerShare: 0 }
+      return { quantity: 0, capitalUsed: 0, grossExposure: 0, leveragedCapital: 0, riskAmount: 0, riskPerShare: 0, leverageMultiplier: 1 }
     }
 
     return derivePaperTradeQuantity({
@@ -84,8 +87,41 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
       riskPercent,
       entryPrice,
       stopLoss,
+      mode,
+      leverageMultiplier,
     })
-  }, [capital, draft, entryPrice, riskPercent, stopLoss])
+  }, [capital, draft, entryPrice, leverageMultiplier, mode, riskPercent, stopLoss])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadLeverage = async () => {
+      if (!draft?.symbol || mode !== 'intraday') {
+        setLeverageMultiplier(1)
+        setLeverageSource('fallback')
+        return
+      }
+
+      try {
+        const response = await API.getIntradayLeverage([draft.symbol])
+        const record = response.data?.results?.[0]
+        if (cancelled) return
+
+        setLeverageMultiplier(Math.max(Number(record?.leverageMultiplier) || 1, 1))
+        setLeverageSource(record?.source || 'fallback')
+      } catch (error) {
+        console.error('Failed to load intraday leverage:', error)
+        if (cancelled) return
+        setLeverageMultiplier(1)
+        setLeverageSource('fallback')
+      }
+    }
+
+    loadLeverage()
+    return () => {
+      cancelled = true
+    }
+  }, [draft?.symbol, mode])
 
   if (!draft) return null
 
@@ -145,6 +181,7 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
             ? 'System levels were manually overridden inside the paper-trade sandbox.'
             : modePreset?.executionReason || draft.executionReason,
         riskReward: derivedRiskReward,
+        leverageMultiplier: mode === 'intraday' ? leverageMultiplier : 1,
       },
       capital,
       riskPercent,
@@ -170,6 +207,7 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
             <div className="paper-summary-row"><span>Setup</span><span>{modePreset?.setupLabel || draft.setupLabel}</span></div>
             <div className="paper-summary-row"><span>Trade Origin</span><span>{effectiveTradeOrigin === 'system_plan' ? 'System plan' : effectiveTradeOrigin === 'system_override' ? 'System override' : 'Manual trade'}</span></div>
             <div className="paper-summary-row"><span>Execution</span><span>{modePreset?.executionLabel || draft.executionLabel}</span></div>
+            <div className="paper-summary-row"><span>Leverage</span><span>{mode === 'intraday' ? `${leverageMultiplier.toFixed(2)}x` : '1.00x'}</span></div>
             <div className="paper-summary-row"><span>Current Price</span><span>{formatPrice(draft.currentPrice)}</span></div>
             <div className="paper-summary-row"><span>Suggested Entry</span><span>{formatPrice(modePreset?.entryPrice)}</span></div>
             <div className="paper-summary-row"><span>Suggested Stop</span><span>{formatPrice(modePreset?.stopLoss)}</span></div>
@@ -280,7 +318,10 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
 
             <div className="paper-sizing-card">
               <div className="paper-summary-row"><span>Quantity</span><span>{sizing.quantity}</span></div>
-              <div className="paper-summary-row"><span>Capital Used</span><span>{formatPrice(sizing.capitalUsed)}</span></div>
+              <div className="paper-summary-row"><span>Capital</span><span>{formatPrice(capital)}</span></div>
+              <div className="paper-summary-row"><span>Leveraged Capital</span><span>{formatPrice(sizing.leveragedCapital)}</span></div>
+              <div className="paper-summary-row"><span>Margin Used</span><span>{formatPrice(sizing.capitalUsed)}</span></div>
+              <div className="paper-summary-row"><span>Actual Exposure</span><span>{formatPrice(sizing.grossExposure)}</span></div>
               <div className="paper-summary-row"><span>Max Risk</span><span>{formatPrice(sizing.riskAmount)}</span></div>
               <div className="paper-summary-row"><span>Risk / Share</span><span>{formatPrice(sizing.riskPerShare)}</span></div>
               <div className="paper-summary-row"><span>Derived RR</span><span>1:{derivedRiskReward}</span></div>
@@ -298,6 +339,7 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
           <div className="paper-trade-notes">
             {(modePreset?.planReason || draft.planReason) && <p><strong>Plan:</strong> {modePreset?.planReason || draft.planReason}</p>}
             {(modePreset?.executionReason || draft.executionReason) && <p><strong>Execution:</strong> {modePreset?.executionReason || draft.executionReason}</p>}
+            {mode === 'intraday' && <p><strong>Leverage Source:</strong> {leverageSource === 'zerodha' ? 'Zerodha equity margin data' : 'Fallback 1x sizing'}</p>}
           </div>
         )}
         </div>

@@ -9,6 +9,7 @@ import CollapsibleSection from './components/CollapsibleSection'
 import PaperTradeModal from './components/PaperTradeModal'
 import PaperTradesPanel from './components/PaperTradesPanel'
 import {
+  autoSquareOffIntradayTrades,
   createPaperTrade,
   loadPaperTrades,
   manuallyCloseTrade,
@@ -120,6 +121,16 @@ export default function App() {
       setMarketLive(isMarketOpen())
     }, 30000)
     return () => clearInterval(i)
+  }, [])
+
+  useEffect(() => {
+    const applyAutoSquareOff = () => {
+      setPaperTrades((current) => autoSquareOffIntradayTrades(current))
+    }
+
+    applyAutoSquareOff()
+    const intervalId = setInterval(applyAutoSquareOff, 30000)
+    return () => clearInterval(intervalId)
   }, [])
 
   useEffect(() => {

@@ -81,6 +81,7 @@ export default function PaperTradesPanel({
       : 'Manual Trade'
 
   const getModeLabel = (trade) => (trade.mode === 'custom' ? 'manual' : trade.mode)
+  const getLeverageLabel = (trade) => `${Number(trade.leverageMultiplier || 1).toFixed(2)}x`
 
   const handleClearClosed = () => {
     if (closedTrades.length === 0) return
@@ -143,6 +144,11 @@ export default function PaperTradesPanel({
                   <span className={`paper-trade-origin ${trade.tradeOrigin === 'system_plan' ? 'origin-system' : 'origin-custom'}`}>
                     {getOriginLabel(trade)}
                   </span>
+                  {trade.mode === 'intraday' && (
+                    <span className="paper-trade-leverage">
+                      {getLeverageLabel(trade)}
+                    </span>
+                  )}
                   <span className={`paper-trade-status status-${trade.status}`}>{trade.statusLabel}</span>
                 </div>
               </div>
@@ -168,6 +174,15 @@ export default function PaperTradesPanel({
                 <div className="paper-stat-tile"><span>{marketLive ? 'LTP' : 'Last Price'}</span><strong>{formatPrice(trade.lastKnownPrice)}</strong></div>
                 <div className="paper-stat-tile"><span>{marketLive ? 'Open PnL' : 'Frozen PnL'}</span><strong className={Number(trade.unrealizedPnl) >= 0 ? 'positive' : 'negative'}>{formatPnl(trade.unrealizedPnl)}</strong></div>
               </div>
+
+              {trade.mode === 'intraday' && (
+                <div className="paper-trade-plan">
+                  <div className="paper-plan-tile"><span>Leverage</span><strong>{getLeverageLabel(trade)}</strong></div>
+                  <div className="paper-plan-tile"><span>Capital Used</span><strong>{formatPrice(trade.capitalUsed)}</strong></div>
+                  <div className="paper-plan-tile"><span>Exposure</span><strong>{formatPrice(trade.grossExposure)}</strong></div>
+                  <div className="paper-plan-tile"><span>Risk Budget</span><strong>{formatPrice(trade.plannedRiskAmount)}</strong></div>
+                </div>
+              )}
 
               <div className="paper-trade-plan">
                 <div className="paper-plan-tile"><span>SL</span><strong>{formatPrice(trade.stopLoss)}</strong></div>
