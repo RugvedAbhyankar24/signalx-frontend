@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import API from '../services/api'
-import { derivePaperTradeQuantity, deriveRiskReward, validateLongTradeLevels } from '../utils/paperTrading'
+import { derivePaperTradeQuantity, deriveRiskReward, validateTradeLevels } from '../utils/paperTrading'
 
 const roundPriceValue = (value) => {
   const n = Number(value)
@@ -12,11 +12,56 @@ const formatPrice = (value) => {
   return Number.isFinite(n) ? `₹${n.toFixed(2)}` : '—'
 }
 
+const formatTradeSide = (direction) => (direction === 'short' ? 'Sell / Short' : 'Buy / Long')
+const getSideToneClass = (direction) => (direction === 'short' ? 'trade-side-short' : 'trade-side-long')
+const buildDirectionalLevels = ({ currentPrice, support, resistance, direction, profile }) => {
+  const safeDirection = direction === 'short' ? 'short' : 'long'
+  const intradayProfile = profile === 'intraday'
+  const entry = currentPrice
+
+  if (safeDirection === 'short') {
+    const stop = Number.isFinite(resistance) && resistance > currentPrice
+      ? resistance
+      : currentPrice * (intradayProfile ? 1.008 : 1.03)
+    const target1 = Number.isFinite(support) && support > 0 && support < currentPrice
+      ? support
+      : currentPrice * (intradayProfile ? 0.992 : 0.97)
+    const target2Base = Number.isFinite(support) && support > 0 && support < currentPrice
+      ? support * (intradayProfile ? 0.996 : 0.985)
+      : currentPrice * (intradayProfile ? 0.984 : 0.94)
+
+    return {
+      entryPrice: entry,
+      stopLoss: stop,
+      target1,
+      target2: Math.min(target2Base, target1 * (intradayProfile ? 0.998 : 0.992))
+    }
+  }
+
+  const stop = Number.isFinite(support) && support > 0 && support < currentPrice
+    ? support
+    : currentPrice * (intradayProfile ? 0.992 : 0.97)
+  const target1 = Number.isFinite(resistance) && resistance > currentPrice
+    ? resistance
+    : currentPrice * (intradayProfile ? 1.008 : 1.03)
+  const target2Base = Number.isFinite(resistance) && resistance > currentPrice
+    ? resistance * (intradayProfile ? 1.004 : 1.03)
+    : currentPrice * (intradayProfile ? 1.016 : 1.06)
+
+  return {
+    entryPrice: entry,
+    stopLoss: stop,
+    target1,
+    target2: Math.max(target2Base, target1 * (intradayProfile ? 1.002 : 1.008))
+  }
+}
+
 export default function PaperTradeModal({ draft, onClose, onConfirm }) {
   const [capital, setCapital] = useState(100000)
   const [riskPercent, setRiskPercent] = useState(1)
   const initialMode = draft?.mode || 'custom'
   const initialPreset = (draft?.modePresets && draft.modePresets[initialMode]) || draft
+  const resolveDirection = (nextMode, value) => (nextMode === 'swing' ? 'long' : (value || 'long'))
   const [mode, setMode] = useState(initialMode)
   const [allowOverrides, setAllowOverrides] = useState(initialMode === 'custom')
   const [entryPrice, setEntryPrice] = useState(roundPriceValue(initialPreset?.entryPrice || draft?.currentPrice))
@@ -27,6 +72,7 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
   const [leverageMultiplier, setLeverageMultiplier] = useState(mode === 'intraday' ? 1 : 1)
   const [leverageSource, setLeverageSource] = useState('fallback')
   const [leverageStatus, setLeverageStatus] = useState(mode === 'intraday' ? 'loading' : 'idle')
+  const [tradeDirection, setTradeDirection] = useState(resolveDirection(initialMode, initialPreset?.direction || draft?.direction))
 
   const modePreset = useMemo(() => {
     const presets = draft?.modePresets || {}
@@ -44,6 +90,7 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
       planReason: draft?.planReason,
       executionReason: draft?.executionReason,
       riskReward: draft?.riskReward,
+      direction: resolveDirection(mode, draft?.direction),
     }
   }, [draft, mode])
 
@@ -54,6 +101,7 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
         stopLoss: draft?.stopLoss,
         target1: draft?.target1,
         target2: draft?.target2,
+        direction: resolveDirection(nextMode, draft?.direction),
       }
 
     setMode(nextMode)
@@ -63,6 +111,7 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
     setStopLoss(roundPriceValue(nextPreset?.stopLoss))
     setTarget1(roundPriceValue(nextPreset?.target1))
     setTarget2(roundPriceValue(nextPreset?.target2))
+    setTradeDirection(resolveDirection(nextMode, nextPreset?.direction || draft?.direction))
   }
 
   const handleOverrideToggle = () => {
@@ -75,8 +124,14 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
       setStopLoss(roundPriceValue(modePreset?.stopLoss))
       setTarget1(roundPriceValue(modePreset?.target1))
       setTarget2(roundPriceValue(modePreset?.target2))
+      setTradeDirection(resolveDirection(mode, modePreset?.direction || draft?.direction))
     }
   }
+
+  const sideEditable = mode === 'custom' || (mode === 'intraday' && allowOverrides)
+  const currentReferencePrice = roundPriceValue(draft?.currentPrice || modePreset?.entryPrice || draft?.entryPrice)
+  const inferredSupport = Number(draft?.support)
+  const inferredResistance = Number(draft?.resistance)
 
   const sizing = useMemo(() => {
     if (!draft) {
@@ -90,8 +145,9 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
       stopLoss,
       mode,
       leverageMultiplier,
+      direction: sideEditable ? tradeDirection : (modePreset?.direction || draft?.direction || 'long'),
     })
-  }, [capital, draft, entryPrice, leverageMultiplier, mode, riskPercent, stopLoss])
+  }, [capital, draft, entryPrice, leverageMultiplier, mode, modePreset?.direction, riskPercent, stopLoss, sideEditable, tradeDirection])
 
   useEffect(() => {
     let cancelled = false
@@ -141,19 +197,40 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
     }
   }, [draft?.symbol, mode])
 
+  useEffect(() => {
+    if (!sideEditable) return
+
+    const profile = mode === 'intraday' ? 'intraday' : 'swing'
+    const nextLevels = buildDirectionalLevels({
+      currentPrice: currentReferencePrice,
+      support: inferredSupport,
+      resistance: inferredResistance,
+      direction: tradeDirection,
+      profile
+    })
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEntryPrice(roundPriceValue(nextLevels.entryPrice))
+    setStopLoss(roundPriceValue(nextLevels.stopLoss))
+    setTarget1(roundPriceValue(nextLevels.target1))
+    setTarget2(roundPriceValue(nextLevels.target2))
+  }, [currentReferencePrice, inferredResistance, inferredSupport, mode, sideEditable, tradeDirection])
+
   if (!draft) return null
 
   const derivedRiskReward = deriveRiskReward({
     entryPrice,
     stopLoss,
     target1,
+    direction: sideEditable ? tradeDirection : (modePreset?.direction || draft?.direction || 'long'),
   })
   const levelsLocked = mode !== 'custom' && !allowOverrides
-  const levelValidation = validateLongTradeLevels({
+  const levelValidation = validateTradeLevels({
     entryPrice,
     stopLoss,
     target1,
     target2,
+    direction: sideEditable ? tradeDirection : (modePreset?.direction || draft?.direction || 'long'),
   })
   const effectiveTradeOrigin =
     mode === 'custom'
@@ -162,12 +239,18 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
       ? 'system_override'
       : modePreset?.tradeOrigin || 'system_plan'
   const suggestedRiskReward = draft?.riskReward && draft.riskReward !== '—'
-    ? modePreset?.riskReward || draft.riskReward
+      ? modePreset?.riskReward || draft.riskReward
     : deriveRiskReward({
         entryPrice: modePreset?.entryPrice,
         stopLoss: modePreset?.stopLoss,
         target1: modePreset?.target1,
+        direction: modePreset?.direction || draft?.direction || 'long',
       })
+  const summaryEntryPrice = sideEditable ? entryPrice : modePreset?.entryPrice
+  const summaryStopLoss = sideEditable ? stopLoss : modePreset?.stopLoss
+  const summaryTarget1 = sideEditable ? target1 : modePreset?.target1
+  const summaryTarget2 = sideEditable ? target2 : modePreset?.target2
+  const summaryRiskReward = sideEditable ? derivedRiskReward : suggestedRiskReward
 
   const handleConfirm = () => {
     if (!levelValidation.valid) {
@@ -193,6 +276,7 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
         stopLoss: Number(stopLoss),
         target1: Number(target1),
         target2: Number(target2),
+        direction: sideEditable ? tradeDirection : (modePreset?.direction || draft?.direction || 'long'),
         planReason: modePreset?.planReason || draft.planReason,
         executionReason:
           allowOverrides && mode !== 'custom'
@@ -225,12 +309,13 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
             <div className="paper-summary-row"><span>Setup</span><span>{modePreset?.setupLabel || draft.setupLabel}</span></div>
             <div className="paper-summary-row"><span>Trade Origin</span><span>{effectiveTradeOrigin === 'system_plan' ? 'System plan' : effectiveTradeOrigin === 'system_override' ? 'System override' : 'Manual trade'}</span></div>
             <div className="paper-summary-row"><span>Execution</span><span>{modePreset?.executionLabel || draft.executionLabel}</span></div>
+            <div className="paper-summary-row"><span>{sideEditable ? 'Trade Side' : 'System Side'}</span><span className={`trade-side-badge ${getSideToneClass(sideEditable ? tradeDirection : (modePreset?.direction || draft?.direction || 'long'))}`}>{formatTradeSide(sideEditable ? tradeDirection : (modePreset?.direction || draft?.direction || 'long'))}</span></div>
             <div className="paper-summary-row"><span>Leverage</span><span>{mode === 'intraday' ? (leverageStatus === 'loading' ? 'Loading…' : `${leverageMultiplier.toFixed(2)}x`) : '1.00x'}</span></div>
             <div className="paper-summary-row"><span>Current Price</span><span>{formatPrice(draft.currentPrice)}</span></div>
-            <div className="paper-summary-row"><span>Suggested Entry</span><span>{formatPrice(modePreset?.entryPrice)}</span></div>
-            <div className="paper-summary-row"><span>Suggested Stop</span><span>{formatPrice(modePreset?.stopLoss)}</span></div>
-            <div className="paper-summary-row"><span>Suggested T1 / T2</span><span>{formatPrice(modePreset?.target1)} / {formatPrice(modePreset?.target2)}</span></div>
-            <div className="paper-summary-row"><span>Suggested RR</span><span>1:{suggestedRiskReward}</span></div>
+            <div className="paper-summary-row"><span>{sideEditable ? 'Working Entry' : 'Suggested Entry'}</span><span>{formatPrice(summaryEntryPrice)}</span></div>
+            <div className="paper-summary-row"><span>{sideEditable ? 'Working Stop' : 'Suggested Stop'}</span><span>{formatPrice(summaryStopLoss)}</span></div>
+            <div className="paper-summary-row"><span>{sideEditable ? 'Working T1 / T2' : 'Suggested T1 / T2'}</span><span>{formatPrice(summaryTarget1)} / {formatPrice(summaryTarget2)}</span></div>
+            <div className="paper-summary-row"><span>{sideEditable ? 'Working RR' : 'Suggested RR'}</span><span>1:{summaryRiskReward}</span></div>
           </div>
 
           <div className="paper-trade-form">
@@ -242,6 +327,16 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
                 <option value="swing">Swing</option>
               </select>
             </label>
+
+            {sideEditable && (
+              <label>
+                Side
+                <select value={tradeDirection} onChange={(e) => setTradeDirection(e.target.value)}>
+                  <option value="long">Buy / Long</option>
+                  <option value="short">Sell / Short</option>
+                </select>
+              </label>
+            )}
 
             {mode !== 'custom' && (
               <div className="paper-override-panel">

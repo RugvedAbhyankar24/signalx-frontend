@@ -35,6 +35,9 @@ const formatTimeOnly = (value) => {
   })
 }
 
+const formatTradeSide = (direction) => (direction === 'short' ? 'Sell / Short' : 'Buy / Long')
+const getSideToneClass = (direction) => (direction === 'short' ? 'trade-side-short' : 'trade-side-long')
+
 export default function PaperTradesPanel({
   trades,
   onCloseTrade,
@@ -155,6 +158,7 @@ export default function PaperTradesPanel({
 
               <div className="paper-trade-card-subhead">
                 <span className="paper-trade-mode">{getModeLabel(trade)}</span>
+                <span className={`trade-side-badge ${getSideToneClass(trade.direction)}`}>{formatTradeSide(trade.direction)}</span>
                 <span className="paper-trade-execution">{trade.executionLabel}</span>
               </div>
 
@@ -227,7 +231,7 @@ export default function PaperTradesPanel({
                   <div className="paper-trade-card-header">
                     <div>
                       <div className="paper-trade-symbol">{trade.symbol}</div>
-                      <div className="paper-trade-meta">{getOriginLabel(trade)} · {trade.statusLabel}</div>
+                      <div className="paper-trade-meta">{getOriginLabel(trade)} · {formatTradeSide(trade.direction)} · {trade.statusLabel}</div>
                     </div>
                     <strong className={Number(trade.realizedPnl) >= 0 ? 'positive' : 'negative'}>
                       {formatPnl(trade.realizedPnl)}

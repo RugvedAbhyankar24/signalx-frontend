@@ -57,6 +57,33 @@ export const validateLongTradeLevels = ({ entryPrice, stopLoss, target1, target2
   return { valid: true, reason: '' }
 }
 
+export const validateTradeLevels = ({ entryPrice, stopLoss, target1, target2, direction = 'long' }) => {
+  const safeDirection = direction === 'short' ? 'short' : 'long'
+  if (safeDirection === 'short') {
+    const entry = Math.max(toNumber(entryPrice), 0)
+    const stop = Math.max(toNumber(stopLoss), 0)
+    const t1 = Math.max(toNumber(target1), 0)
+    const t2 = Math.max(toNumber(target2), 0)
+
+    if (!entry || !stop || !t1 || !t2) {
+      return { valid: false, reason: 'All trade levels must be greater than zero.' }
+    }
+    if (stop <= entry) {
+      return { valid: false, reason: 'For short trades, stop loss must be above entry price.' }
+    }
+    if (t1 > entry) {
+      return { valid: false, reason: 'For short trades, Target 1 must be at or below entry price.' }
+    }
+    if (t2 > t1) {
+      return { valid: false, reason: 'Target 2 must be less than or equal to Target 1.' }
+    }
+
+    return { valid: true, reason: '' }
+  }
+
+  return validateLongTradeLevels({ entryPrice, stopLoss, target1, target2 })
+}
+
 export const loadPaperTrades = () => {
   if (typeof window === 'undefined') return []
 
@@ -84,6 +111,7 @@ export const derivePaperTradeQuantity = ({
   stopLoss,
   mode,
   leverageMultiplier,
+  direction = 'long',
 }) => {
   const capitalValue = Math.max(toNumber(capital), 0)
   const riskValue = Math.max(toNumber(riskPercent), 0)
@@ -92,6 +120,7 @@ export const derivePaperTradeQuantity = ({
   const normalizedLeverage = mode === 'intraday'
     ? Math.max(toNumber(leverageMultiplier, 1), 1)
     : 1
+  const safeDirection = direction === 'short' ? 'short' : 'long'
 
   if (!capitalValue || !entry) {
     return {
@@ -104,7 +133,7 @@ export const derivePaperTradeQuantity = ({
     }
   }
 
-  if (stop >= entry) {
+  if ((safeDirection === 'long' && stop >= entry) || (safeDirection === 'short' && stop <= entry)) {
     return {
       quantity: 0,
       riskPerShare: 0,
@@ -115,10 +144,10 @@ export const derivePaperTradeQuantity = ({
     }
   }
 
-  const riskPerShare = Math.max(entry - stop, 0.01)
+  const riskPerShare = Math.max(safeDirection === 'short' ? stop - entry : entry - stop, 0.01)
   const effectiveBuyingPower = capitalValue * normalizedLeverage
   const capitalCappedQty = Math.floor(effectiveBuyingPower / entry)
-  const riskBudgetBase = mode === 'intraday' ? effectiveBuyingPower : capitalValue
+  const riskBudgetBase = capitalValue
   const riskBudget = riskBudgetBase * (riskValue / 100)
   const riskCappedQty = riskValue > 0 ? Math.floor(riskBudget / riskPerShare) : capitalCappedQty
   const quantity = Math.max(Math.min(capitalCappedQty, riskCappedQty), 0)
@@ -135,16 +164,20 @@ export const derivePaperTradeQuantity = ({
   }
 }
 
-export const deriveRiskReward = ({ entryPrice, stopLoss, target1 }) => {
+export const deriveRiskReward = ({ entryPrice, stopLoss, target1, direction = 'long' }) => {
   const entry = Math.max(toNumber(entryPrice), 0)
   const stop = Math.max(toNumber(stopLoss), 0)
   const target = Math.max(toNumber(target1), 0)
+  const safeDirection = direction === 'short' ? 'short' : 'long'
 
   if (!entry || !target || entry === stop) return '—'
-  if (stop >= entry || target < entry) return '—'
+  if (
+    (safeDirection === 'long' && (stop >= entry || target < entry)) ||
+    (safeDirection === 'short' && (stop <= entry || target > entry))
+  ) return '—'
 
-  const reward = target - entry
-  const risk = entry - stop
+  const reward = safeDirection === 'short' ? entry - target : target - entry
+  const risk = safeDirection === 'short' ? stop - entry : entry - stop
   if (!risk) return '—'
 
   return (reward / risk).toFixed(2)
@@ -161,11 +194,12 @@ export const evaluatePaperTrade = (trade, priceOverride) => {
   const currentPrice = toNumber(priceOverride ?? trade.lastKnownPrice, entry)
   const direction = getTradeDirection(trade)
   const sign = direction === 'short' ? -1 : 1
-  const levelsValid = validateLongTradeLevels({
+  const levelsValid = validateTradeLevels({
     entryPrice: entry,
     stopLoss: stop,
     target1: t1,
     target2: t2,
+    direction,
   }).valid
   const unrealizedPnl = (currentPrice - entry) * quantity * sign
   const unrealizedPct = entry ? ((currentPrice - entry) / entry) * 100 * sign : 0
@@ -226,12 +260,14 @@ export const createPaperTrade = ({ signal, capital, riskPercent, quantity }) => 
     stopLoss: stop,
     mode: signal.mode,
     leverageMultiplier: signal.leverageMultiplier,
+    direction: signal.direction,
   })
   const finalQuantity = Math.max(toNumber(quantity), 0) || derived.quantity
   const createdAt = new Date().toISOString()
   const leverageMultiplier = Math.max(toNumber(signal.leverageMultiplier, signal.mode === 'intraday' ? 1 : 1), 1)
   const grossExposure = finalQuantity * entry
   const capitalUsed = leverageMultiplier > 1 ? grossExposure / leverageMultiplier : grossExposure
+  const safeDirection = signal.direction === 'short' ? 'short' : 'long'
 
   const trade = {
     id: `${signal.symbol}-${signal.mode}-${Date.now()}`,
@@ -253,15 +289,16 @@ export const createPaperTrade = ({ signal, capital, riskPercent, quantity }) => 
     leverageMultiplier,
     capitalUsed,
     grossExposure,
-    plannedRiskAmount: finalQuantity * Math.max(entry - stop, 0.01),
+    plannedRiskAmount: finalQuantity * Math.max(safeDirection === 'short' ? stop - entry : entry - stop, 0.01),
     planReason: signal.planReason || '',
     executionReason: signal.executionReason || '',
     riskReward: signal.riskReward || deriveRiskReward({
       entryPrice: entry,
       stopLoss: stop,
       target1: t1,
+      direction: safeDirection,
     }),
-    direction: 'long',
+    direction: safeDirection,
     status: 'open',
     statusLabel: 'Open',
     closeReason: null,

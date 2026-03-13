@@ -1,6 +1,50 @@
 import React from 'react'
 
 export default function StockCard({ item, onPaperTrade }) {
+  const formatTradeSide = (direction) => (direction === 'short' ? 'Sell / Short' : 'Buy / Long')
+  const getSideToneClass = (direction) => (direction === 'short' ? 'trade-side-short' : 'trade-side-long')
+  const buildDirectionalLevels = ({ currentPrice, support, resistance, direction, profile }) => {
+    const safeDirection = direction === 'short' ? 'short' : 'long'
+    const intradayProfile = profile === 'intraday'
+    const entry = currentPrice
+
+    if (safeDirection === 'short') {
+      const stop = Number.isFinite(resistance) && resistance > currentPrice
+        ? resistance
+        : currentPrice * (intradayProfile ? 1.008 : 1.03)
+      const target1 = Number.isFinite(support) && support > 0 && support < currentPrice
+        ? support
+        : currentPrice * (intradayProfile ? 0.992 : 0.97)
+      const target2Base = Number.isFinite(support) && support > 0 && support < currentPrice
+        ? support * (intradayProfile ? 0.996 : 0.985)
+        : currentPrice * (intradayProfile ? 0.984 : 0.94)
+
+      return {
+        entryPrice: entry,
+        stopLoss: stop,
+        target1,
+        target2: Math.min(target2Base, target1 * (intradayProfile ? 0.998 : 0.992))
+      }
+    }
+
+    const stop = Number.isFinite(support) && support > 0 && support < currentPrice
+      ? support
+      : currentPrice * (intradayProfile ? 0.992 : 0.97)
+    const target1 = Number.isFinite(resistance) && resistance > currentPrice
+      ? resistance
+      : currentPrice * (intradayProfile ? 1.008 : 1.03)
+    const target2Base = Number.isFinite(resistance) && resistance > currentPrice
+      ? resistance * (intradayProfile ? 1.004 : 1.03)
+      : currentPrice * (intradayProfile ? 1.016 : 1.06)
+
+    return {
+      entryPrice: entry,
+      stopLoss: stop,
+      target1,
+      target2: Math.max(target2Base, target1 * (intradayProfile ? 1.002 : 1.008))
+    }
+  }
+
   const formatPrice = (value) => {
     const n = Number(value)
     return Number.isFinite(n) ? `₹${n.toFixed(2)}` : '—'
@@ -72,27 +116,39 @@ export default function StockCard({ item, onPaperTrade }) {
     const currentPrice = Number(item.currentPrice) || 0
     const support = Number(item.support)
     const resistance = Number(item.resistance)
-    const manualStop = currentPrice ? currentPrice * 0.97 : 0
-    const manualTarget1 = currentPrice ? currentPrice * 1.03 : 0
-    const manualTarget2 = currentPrice ? currentPrice * 1.06 : 0
-
-    const intradayStop = currentPrice ? currentPrice * 0.992 : 0
-    const intradayTarget1 = currentPrice ? currentPrice * 1.008 : 0
-    const intradayTarget2 = currentPrice ? currentPrice * 1.016 : 0
-
-    const swingStop = currentPrice ? currentPrice * 0.955 : 0
-    const swingTarget1 = currentPrice ? currentPrice * 1.04 : 0
-    const swingTarget2 = currentPrice ? currentPrice * 1.08 : 0
+    const inferredDirection = item.intradayView?.tradeDirection || 'long'
+    const manualLevels = buildDirectionalLevels({
+      currentPrice,
+      support,
+      resistance,
+      direction: inferredDirection,
+      profile: 'swing'
+    })
+    const intradayFallbackLevels = buildDirectionalLevels({
+      currentPrice,
+      support,
+      resistance,
+      direction: inferredDirection,
+      profile: 'intraday'
+    })
+    const swingLevels = buildDirectionalLevels({
+      currentPrice,
+      support,
+      resistance,
+      direction: 'long',
+      profile: 'swing'
+    })
 
     const customPreset = {
       mode: 'custom',
       tradeOrigin: 'custom',
       setupLabel: item.swingView?.label || item.decision?.label || 'Manual Sandbox Trade',
       executionLabel: 'Manual paper trade',
-      entryPrice: currentPrice,
-      stopLoss: Number.isFinite(support) && support > 0 && support < currentPrice ? support : manualStop,
-      target1: Number.isFinite(resistance) && resistance > currentPrice ? resistance : manualTarget1,
-      target2: Number.isFinite(resistance) && resistance > currentPrice ? resistance * 1.03 : manualTarget2,
+      direction: inferredDirection,
+      entryPrice: manualLevels.entryPrice,
+      stopLoss: manualLevels.stopLoss,
+      target1: manualLevels.target1,
+      target2: manualLevels.target2,
       planReason: 'Manual paper trade seeded from stock scan levels. You can edit entry, stop, and targets in the simulator.',
       executionReason: item.decision?.reason || 'Use this sandbox to test both profit-making and loss-making trade plans.',
       riskReward: '—',
@@ -111,6 +167,7 @@ export default function StockCard({ item, onPaperTrade }) {
           planReason: item.intradayOpportunity?.entryReason,
           executionReason: item.intradayOpportunity?.actionableEntryQuality?.reason,
           riskReward: item.intradayOpportunity?.riskReward,
+          direction: item.intradayOpportunity?.direction || 'long',
         }
       : {
           ...customPreset,
@@ -118,9 +175,11 @@ export default function StockCard({ item, onPaperTrade }) {
           tradeOrigin: 'custom',
           setupLabel: item.intradayView?.label || 'No Clear Intraday Signal',
           executionLabel: 'Not Qualified',
-          stopLoss: intradayStop,
-          target1: intradayTarget1,
-          target2: intradayTarget2,
+          direction: inferredDirection,
+          entryPrice: intradayFallbackLevels.entryPrice,
+          stopLoss: intradayFallbackLevels.stopLoss,
+          target1: intradayFallbackLevels.target1,
+          target2: intradayFallbackLevels.target2,
           planReason: item.intradayOpportunity?.reason || 'No intraday edge right now. Using tighter intraday fallback levels.',
           executionReason: item.intradayOpportunity?.reason || 'No intraday edge right now. Review before execution.',
         }
@@ -131,6 +190,7 @@ export default function StockCard({ item, onPaperTrade }) {
           tradeOrigin: 'system_plan',
           setupLabel: item.swingView?.label || 'Swing setup',
           executionLabel: item.swingOpportunity?.actionableEntryQuality?.label || 'Qualified',
+          direction: 'long',
           entryPrice: item.swingOpportunity?.entryPrice,
           stopLoss: item.swingOpportunity?.stopLoss,
           target1: item.swingOpportunity?.target1,
@@ -145,9 +205,10 @@ export default function StockCard({ item, onPaperTrade }) {
           tradeOrigin: 'custom',
           setupLabel: item.swingView?.label || 'No Swing Opportunity',
           executionLabel: 'Not Qualified',
-          stopLoss: Number.isFinite(support) && support > 0 && support < currentPrice ? support : swingStop,
-          target1: Number.isFinite(resistance) && resistance > currentPrice ? resistance : swingTarget1,
-          target2: Number.isFinite(resistance) && resistance > currentPrice ? resistance * 1.04 : swingTarget2,
+          direction: 'long',
+          stopLoss: swingLevels.stopLoss,
+          target1: swingLevels.target1,
+          target2: swingLevels.target2,
           planReason: item.swingOpportunity?.reason || 'No swing edge right now. Using wider swing fallback levels.',
           executionReason: item.swingOpportunity?.reason || 'No swing edge right now. Review structure before execution.',
         }
@@ -173,6 +234,8 @@ export default function StockCard({ item, onPaperTrade }) {
     onPaperTrade({
       symbol: item.symbol,
       companyName: item.companyName,
+      support: item.support,
+      resistance: item.resistance,
       mode,
       tradeOrigin: selectedPreset.tradeOrigin,
       setupLabel: selectedPreset.setupLabel || view?.label || `${mode} setup`,
@@ -181,6 +244,7 @@ export default function StockCard({ item, onPaperTrade }) {
       stopLoss: selectedPreset.stopLoss ?? opportunity.stopLoss,
       target1: selectedPreset.target1 ?? opportunity.target1,
       target2: selectedPreset.target2 ?? opportunity.target2,
+      direction: selectedPreset.direction || opportunity.direction || 'long',
       currentPrice: item.currentPrice,
       planReason: selectedPreset.planReason || opportunity.entryReason,
       executionReason: selectedPreset.executionReason || opportunity.actionableEntryQuality?.reason,
@@ -199,6 +263,8 @@ export default function StockCard({ item, onPaperTrade }) {
     onPaperTrade({
       symbol: item.symbol,
       companyName: item.companyName,
+      support: item.support,
+      resistance: item.resistance,
       mode: 'custom',
       tradeOrigin: selectedPreset.tradeOrigin,
       setupLabel: selectedPreset.setupLabel,
@@ -207,6 +273,7 @@ export default function StockCard({ item, onPaperTrade }) {
       stopLoss: selectedPreset.stopLoss,
       target1: selectedPreset.target1,
       target2: selectedPreset.target2,
+      direction: selectedPreset.direction || 'long',
       currentPrice: item.currentPrice,
       planReason: selectedPreset.planReason,
       executionReason: selectedPreset.executionReason,
@@ -373,6 +440,7 @@ export default function StockCard({ item, onPaperTrade }) {
         </button>
       </div>
       <div className="kv"><span>Intraday Action</span><span className={`entry-quality-text ${getActionableToneClass(item.intradayOpportunity?.actionableEntryQuality)}`}>{item.intradayOpportunity?.actionableEntryQuality?.label || '—'}</span></div>
+      <div className="kv"><span>Side</span><span className={`trade-side-badge ${getSideToneClass(item.intradayOpportunity?.direction)}`}>{formatTradeSide(item.intradayOpportunity?.direction)}</span></div>
       <div className="kv"><span>Entry / SL</span><span>{formatPrice(item.intradayOpportunity?.entryPrice)} / {formatPrice(item.intradayOpportunity?.stopLoss)}</span></div>
       <div className="kv"><span>T1 / T2</span><span>{formatPrice(item.intradayOpportunity?.target1)} / {formatPrice(item.intradayOpportunity?.target2)}</span></div>
       <div className="kv"><span>RR</span><span>{item.intradayOpportunity?.riskReward || '—'}</span></div>
@@ -380,6 +448,7 @@ export default function StockCard({ item, onPaperTrade }) {
     </>
   ) : (
     <div className="inline-reasons compact-reasons">
+      <div>• Intraday Bias: <span className={`trade-side-badge ${getSideToneClass(item.intradayView?.tradeDirection)}`}>{formatTradeSide(item.intradayView?.tradeDirection)}</span></div>
       <div>• {item.intradayOpportunity?.reason || 'No intraday edge right now'}</div>
     </div>
   )}
