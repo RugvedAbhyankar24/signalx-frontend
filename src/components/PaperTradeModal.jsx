@@ -26,6 +26,7 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
   const [validationMessage, setValidationMessage] = useState('')
   const [leverageMultiplier, setLeverageMultiplier] = useState(mode === 'intraday' ? 1 : 1)
   const [leverageSource, setLeverageSource] = useState('fallback')
+  const [leverageStatus, setLeverageStatus] = useState(mode === 'intraday' ? 'loading' : 'idle')
 
   const modePreset = useMemo(() => {
     const presets = draft?.modePresets || {}
@@ -99,22 +100,39 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
       if (!draft?.symbol || mode !== 'intraday') {
         setLeverageMultiplier(1)
         setLeverageSource('fallback')
+        setLeverageStatus('idle')
         return
       }
 
-      try {
-        const response = await API.getIntradayLeverage([draft.symbol])
-        const record = response.data?.results?.[0]
-        if (cancelled) return
+      setLeverageStatus('loading')
 
-        setLeverageMultiplier(Math.max(Number(record?.leverageMultiplier) || 1, 1))
-        setLeverageSource(record?.source || 'fallback')
-      } catch (error) {
-        console.error('Failed to load intraday leverage:', error)
-        if (cancelled) return
-        setLeverageMultiplier(1)
-        setLeverageSource('fallback')
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+          const response = await API.getIntradayLeverage([draft.symbol])
+          const record = response.data?.results?.[0]
+          if (cancelled) return
+
+          const nextLeverage = Math.max(Number(record?.leverageMultiplier) || 1, 1)
+          const nextSource = record?.source || 'fallback'
+          setLeverageMultiplier(nextLeverage)
+          setLeverageSource(nextSource)
+          setLeverageStatus(nextSource === 'zerodha' ? 'ready' : 'fallback')
+
+          if (nextSource === 'zerodha') return
+        } catch (error) {
+          console.error('Failed to load intraday leverage:', error)
+          if (cancelled) return
+        }
+
+        if (attempt < 2) {
+          await new Promise((resolve) => setTimeout(resolve, 600))
+        }
       }
+
+      if (cancelled) return
+      setLeverageMultiplier(1)
+      setLeverageSource('fallback')
+      setLeverageStatus('fallback')
     }
 
     loadLeverage()
@@ -207,7 +225,7 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
             <div className="paper-summary-row"><span>Setup</span><span>{modePreset?.setupLabel || draft.setupLabel}</span></div>
             <div className="paper-summary-row"><span>Trade Origin</span><span>{effectiveTradeOrigin === 'system_plan' ? 'System plan' : effectiveTradeOrigin === 'system_override' ? 'System override' : 'Manual trade'}</span></div>
             <div className="paper-summary-row"><span>Execution</span><span>{modePreset?.executionLabel || draft.executionLabel}</span></div>
-            <div className="paper-summary-row"><span>Leverage</span><span>{mode === 'intraday' ? `${leverageMultiplier.toFixed(2)}x` : '1.00x'}</span></div>
+            <div className="paper-summary-row"><span>Leverage</span><span>{mode === 'intraday' ? (leverageStatus === 'loading' ? 'Loading…' : `${leverageMultiplier.toFixed(2)}x`) : '1.00x'}</span></div>
             <div className="paper-summary-row"><span>Current Price</span><span>{formatPrice(draft.currentPrice)}</span></div>
             <div className="paper-summary-row"><span>Suggested Entry</span><span>{formatPrice(modePreset?.entryPrice)}</span></div>
             <div className="paper-summary-row"><span>Suggested Stop</span><span>{formatPrice(modePreset?.stopLoss)}</span></div>
@@ -319,7 +337,7 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
             <div className="paper-sizing-card">
               <div className="paper-summary-row"><span>Quantity</span><span>{sizing.quantity}</span></div>
               <div className="paper-summary-row"><span>Capital</span><span>{formatPrice(capital)}</span></div>
-              <div className="paper-summary-row"><span>Leveraged Capital</span><span>{formatPrice(sizing.leveragedCapital)}</span></div>
+              <div className="paper-summary-row"><span>Leveraged Capital</span><span>{mode === 'intraday' && leverageStatus === 'loading' ? 'Loading…' : formatPrice(sizing.leveragedCapital)}</span></div>
               <div className="paper-summary-row"><span>Margin Used</span><span>{formatPrice(sizing.capitalUsed)}</span></div>
               <div className="paper-summary-row"><span>Actual Exposure</span><span>{formatPrice(sizing.grossExposure)}</span></div>
               <div className="paper-summary-row"><span>Max Risk</span><span>{formatPrice(sizing.riskAmount)}</span></div>
@@ -339,14 +357,24 @@ export default function PaperTradeModal({ draft, onClose, onConfirm }) {
           <div className="paper-trade-notes">
             {(modePreset?.planReason || draft.planReason) && <p><strong>Plan:</strong> {modePreset?.planReason || draft.planReason}</p>}
             {(modePreset?.executionReason || draft.executionReason) && <p><strong>Execution:</strong> {modePreset?.executionReason || draft.executionReason}</p>}
-            {mode === 'intraday' && <p><strong>Leverage Source:</strong> {leverageSource === 'zerodha' ? 'Zerodha equity margin data' : 'Fallback 1x sizing'}</p>}
+            {mode === 'intraday' && (
+              <p>
+                <strong>Leverage Source:</strong> {
+                  leverageStatus === 'loading'
+                    ? 'Loading leverage data'
+                    : leverageSource === 'zerodha'
+                    ? 'Zerodha equity margin data'
+                    : 'Fallback 1x sizing'
+                }
+              </p>
+            )}
           </div>
         )}
         </div>
 
         <div className="paper-trade-actions">
           <button className="paper-secondary-btn" onClick={onClose}>Cancel</button>
-          <button className="paper-primary-btn" onClick={handleConfirm} disabled={sizing.quantity <= 0}>
+          <button className="paper-primary-btn" onClick={handleConfirm} disabled={sizing.quantity <= 0 || (mode === 'intraday' && leverageStatus === 'loading')}>
             Add Paper Trade
           </button>
         </div>
