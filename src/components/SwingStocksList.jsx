@@ -200,131 +200,117 @@ const SwingStocksList = ({ onPaperTrade, onPriceUpdate }) => {
                 </div>
               </div>
 
-              <div className="stock-metrics">
-                <div className="metric-row">
-                  <span className="metric-label">Current Price:</span>
-                  <span className="metric-value">{formatPrice(stock.currentPrice)}</span>
+              <div className="swing-hero-metrics">
+                <div className="swing-metric-tile">
+                  <span>Current</span>
+                  <strong>{formatPrice(stock.currentPrice)}</strong>
                 </div>
-
-                {/* Swing Entry Price Section */}
-                <div className="metric-row entry-price-section">
-                  <span className="metric-label">Entry Price:</span>
-                  <span className="metric-value entry-price-value">{formatPrice(stock.entryPrice)}</span>
+                <div className="swing-metric-tile swing-metric-entry">
+                  <span>Entry</span>
+                  <strong>{formatPrice(stock.entryPrice)}</strong>
                 </div>
-
-                <div className="metric-row metric-row-action">
-                  <span className="metric-label">Simulator:</span>
-                  <button
-                    className="paper-trade-btn"
-                    onClick={() => {
-                      const modePresets = buildModePresets(stock)
-                      const selectedPreset = modePresets.swing
-                      onPaperTrade?.({
-                        symbol: stock.symbol,
-                        companyName: stock.companyName,
-                        mode: 'swing',
-                        tradeOrigin: selectedPreset.tradeOrigin,
-                        setupLabel: selectedPreset.setupLabel,
-                        executionLabel: selectedPreset.executionLabel,
-                        entryPrice: selectedPreset.entryPrice,
-                        stopLoss: selectedPreset.stopLoss,
-                        target1: selectedPreset.target1,
-                        target2: selectedPreset.target2,
-                        currentPrice: stock.currentPrice,
-                        planReason: selectedPreset.planReason,
-                        executionReason: selectedPreset.executionReason,
-                        riskReward: selectedPreset.riskReward,
-                        modePresets,
-                        source: 'swing_tab',
-                      })
-                    }}
-                  >
-                    Use Swing Plan
-                  </button>
+                <div className="swing-metric-tile">
+                  <span>RR</span>
+                  <strong>1:{stock.riskReward}</strong>
                 </div>
-
-                <div className="metric-row">
-                  <span className="metric-label">Stop Loss:</span>
-                  <span className="metric-value stop-loss">{formatPrice(stock.stopLoss)}</span>
-                </div>
-
-                <div className="metric-row">
-                  <span className="metric-label">Target 1:</span>
-                  <span className="metric-value target">{formatPrice(stock.target1)}</span>
-                </div>
-
-                <div className="metric-row">
-                  <span className="metric-label">Target 2:</span>
-                  <span className="metric-value target2">{formatPrice(stock.target2)}</span>
-                </div>
-
-                <div className="metric-row">
-                  <span className="metric-label">Risk/Reward:</span>
-                  <span className="metric-value risk-reward">1:{stock.riskReward}</span>
-                </div>
-
-                <div className="metric-row">
-                  <span className="metric-label">Gap:</span>
-                  <span className={`metric-value ${stock.gapOpenPct >= 0 ? 'positive' : 'negative'}`}>
+                <div className="swing-metric-tile">
+                  <span>Gap</span>
+                  <strong className={stock.gapOpenPct >= 0 ? 'positive' : 'negative'}>
                     {formatGap(stock.gapOpenPct)}
-                  </span>
+                  </strong>
                 </div>
+              </div>
 
-                <div className="metric-row">
-                  <span className="metric-label">RSI:</span>
-                  <span className="metric-value">{stock.rsi?.toFixed(1) || 'N/A'}</span>
+              <div className="swing-action-row">
+                <div className="swing-plan-summary">
+                  <span>Stop {formatPrice(stock.stopLoss)}</span>
+                  <span>T1 {formatPrice(stock.target1)}</span>
+                  <span>T2 {formatPrice(stock.target2)}</span>
                 </div>
+                <button
+                  className="paper-trade-btn swing-primary-cta"
+                  onClick={() => {
+                    const modePresets = buildModePresets(stock)
+                    const selectedPreset = modePresets.swing
+                    onPaperTrade?.({
+                      symbol: stock.symbol,
+                      companyName: stock.companyName,
+                      mode: 'swing',
+                      tradeOrigin: selectedPreset.tradeOrigin,
+                      setupLabel: selectedPreset.setupLabel,
+                      executionLabel: selectedPreset.executionLabel,
+                      entryPrice: selectedPreset.entryPrice,
+                      stopLoss: selectedPreset.stopLoss,
+                      target1: selectedPreset.target1,
+                      target2: selectedPreset.target2,
+                      currentPrice: stock.currentPrice,
+                      planReason: selectedPreset.planReason,
+                      executionReason: selectedPreset.executionReason,
+                      riskReward: selectedPreset.riskReward,
+                      modePresets,
+                      source: 'swing_tab',
+                    })
+                  }}
+                >
+                  Use Swing Plan
+                </button>
+              </div>
 
-                <div className="metric-row">
-                  <span className="metric-label">Market Cap:</span>
-                  <span className="metric-value">{formatMarketCap(stock.marketCap)}</span>
-                </div>
-
-                <div className="metric-row">
-                  <span className="metric-label">Volume Spike:</span>
-                  <span className={`metric-value ${stock.volume?.volumeSpike ? 'positive' : 'neutral'}`}>
-                    {stock.volume?.volumeSpike ? '✓ Yes' : 'No'}
-                  </span>
-                </div>
-
-                <div className="metric-row">
-                  <span className="metric-label">Above VWAP:</span>
-                  <span className={`metric-value ${stock.currentPrice > stock.vwap ? 'positive' : 'negative'}`}>
-                    {stock.currentPrice > stock.vwap ? '✓ Yes' : 'No'}
-                  </span>
-                </div>
-
-                <div className="metric-row">
-                  <span className="metric-label">Swing VWAP:</span>
-                  <span className={`metric-value ${stock.swingVwap && stock.currentPrice && stock.swingVwap > stock.currentPrice * 1.1 ? 'vwap-warning' : 'neutral'}`}>
-                    {formatPrice(stock.swingVwap)}
-                    {stock.swingVwap && stock.currentPrice && stock.swingVwap > stock.currentPrice * 1.1 && (
-                      <span className="vwap-warning-text"> (far above - mean reversion risk)</span>
-                    )}
-                  </span>
-                </div>
-
-                <div className="metric-row entry-reason">
-                  <span className="metric-label">Entry Reason:</span>
-                  <span className="metric-value entry-reason-text">
-                    {stock.entryReason?.replace(/\s+/g, ' ').trim()}
-                  </span>
-                </div>
-
-                {stock.actionableEntryQuality?.reason && (
-                  <div className="metric-row entry-quality-row">
-                    <span className="metric-label">Actionable View:</span>
-                    <span className={`metric-value entry-quality-text ${getActionableToneClass(stock.actionableEntryQuality)}`}>
-                      {stock.actionableEntryQuality.reason}
+              <div className="swing-detail-group swing-detail-group-wide">
+                <div className="swing-detail-title">Setup Snapshot</div>
+                <div className="swing-compact-grid">
+                  <div className="metric-row">
+                    <span className="metric-label">Market Cap</span>
+                    <span className="metric-value">{formatMarketCap(stock.marketCap)}</span>
+                  </div>
+                  <div className="metric-row">
+                    <span className="metric-label">RSI</span>
+                    <span className="metric-value">{stock.rsi?.toFixed(1) || 'N/A'}</span>
+                  </div>
+                  <div className="metric-row">
+                    <span className="metric-label">Volume Spike</span>
+                    <span className={`metric-value ${stock.volume?.volumeSpike ? 'positive' : 'neutral'}`}>
+                      {stock.volume?.volumeSpike ? '✓ Yes' : 'No'}
                     </span>
+                  </div>
+                  <div className="metric-row">
+                    <span className="metric-label">Above VWAP</span>
+                    <span className={`metric-value ${stock.currentPrice > stock.vwap ? 'positive' : 'negative'}`}>
+                      {stock.currentPrice > stock.vwap ? '✓ Yes' : 'No'}
+                    </span>
+                  </div>
+                  <div className="metric-row">
+                    <span className="metric-label">Swing VWAP</span>
+                    <span className={`metric-value ${stock.swingVwap && stock.currentPrice && stock.swingVwap > stock.currentPrice * 1.1 ? 'vwap-warning' : 'neutral'}`}>
+                      {formatPrice(stock.swingVwap)}
+                    </span>
+                  </div>
+                  <div className="metric-row">
+                    <span className="metric-label">Actionability</span>
+                    <span className={`metric-value ${getActionableToneClass(stock.actionableEntryQuality)}`}>
+                      {stock.actionableEntryQuality?.label || 'Review'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="swing-thesis-strip">
+                <div className="swing-thesis-card">
+                  <span className="swing-thesis-label">Entry Reason</span>
+                  <p>{stock.entryReason?.replace(/\s+/g, ' ').trim()}</p>
+                </div>
+                {stock.actionableEntryQuality?.reason && (
+                  <div className={`swing-thesis-card ${getActionableToneClass(stock.actionableEntryQuality)}`}>
+                    <span className="swing-thesis-label">Actionable View</span>
+                    <p>{stock.actionableEntryQuality.reason}</p>
                   </div>
                 )}
               </div>
 
               <div className="stock-reasons">
-                <h4>Why Positive for Swing:</h4>
+                <h4>Why Positive for Swing</h4>
                 <ul>
-                  {stock.swingView.reasons?.slice(0, 3).map((reason, idx) => (
+                  {stock.swingView.reasons?.slice(0, 2).map((reason, idx) => (
                     <li key={idx}>{reason}</li>
                   ))}
                 </ul>

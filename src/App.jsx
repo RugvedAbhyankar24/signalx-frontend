@@ -327,166 +327,271 @@ export default function App() {
 
   return (
     <div className="container">
+      <div className="app-shell">
+        <div className="app-shell-grid" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="ambient-orb orb-a" aria-hidden="true" />
+        <div className="ambient-orb orb-b" aria-hidden="true" />
+        <div className="ambient-orb orb-c" aria-hidden="true" />
 
-      {/* Top-left Logo */}
-      <div className="top-left-logo" onClick={() => window.location.reload()} style={{ cursor: 'pointer' }}>
-        <img src="/SignalX_logo.svg" alt="SignalX" className="app-logo" />
-      </div>
-
-      <div className="layout">
-
-        {/* MAIN CONTENT */}
-        <div className="main-content">
-
-          <div className="hero">
-            <h1>SignalX — Smart Intraday Trade Signals</h1>
-            <p>
-              Intraday scanner using <b>Gap %, RSI, VWAP & Volume</b>
-            </p>
+        <div className="app-header">
+          <div className="top-left-logo" onClick={() => window.location.reload()} style={{ cursor: 'pointer' }}>
+            <img src="/SignalX_logo.svg" alt="SignalX" className="app-logo" />
           </div>
+        </div>
 
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '4px 12px',
-              borderRadius: '999px',
-              fontSize: '12px',
-              fontWeight: 600,
-              background: marketLive
-                ? 'rgba(34,197,94,0.15)'
-                : 'rgba(234,179,8,0.15)',
-              color: marketLive ? '#22c55e' : '#eab308',
-              border: marketLive
-                ? '1px solid rgba(34,197,94,0.4)'
-                : '1px solid rgba(234,179,8,0.4)'
-            }}
-          >
-            {marketLive ? '🟢 Market Live' : '🕒 Market Closed'}
-          </div>
+        <div className="layout">
 
-          <div className="search-box">
-            <label>Enter Stock Symbol</label>
+          {/* MAIN CONTENT */}
+          <div className="main-content">
+            <div className="hero-panel">
+              <div className="hero-panel-glow" aria-hidden="true" />
+              <div className="hero-panel-layout">
+                <div className="hero-copy">
+                  <div className="hero">
+                    <h1>SignalX — Smart Intraday Trade Signals</h1>
+                    <p>
+                      Intraday scanner using <b>Gap %, RSI, VWAP & Volume</b>
+                    </p>
+                  </div>
 
-            <div className="search-wrapper">
-              <input
-                value={symbolsInput}
-                onChange={(e) => {
-                  setSymbolsInput(e.target.value.toUpperCase())
-                  setSelectedSymbol('')
-                  setShowSuggestions(true)
-                }}
-                placeholder="Search NSE stock (RELIANCE, BHARTIARTL, TCS...)"
-              />
-
-              {showSuggestions && filteredSuggestions.length > 0 && (
-                <div className="suggestions">
-                  {filteredSuggestions.map((s) => (
-                    <div
-                      key={s.symbol}
-                      className="suggestion-item"
-                      onMouseDown={() => {
-                        setSymbolsInput(s.symbol)
-                        setSelectedSymbol(s.symbol)
-                        setShowSuggestions(false)
-                      }}
-                    >
-                      <strong>{s.symbol}</strong>
-                      <span>{s.name}</span>
+                  <div className="hero-status-strip">
+                    <div className="hero-status-tile">
+                      <div
+                        className={`market-pulse-chip ${marketLive ? 'is-live' : 'is-closed'}`}
+                      >
+                        <span className="market-pulse-dot" />
+                        {marketLive ? '🟢 Market Live' : '🕒 Market Closed'}
+                      </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              )}
+
+                <div className="hero-visual" aria-hidden="true">
+                  <div className="hero-symbol-lane lane-top">
+                    <div className="hero-symbol-track">
+                      <span>RELIANCE</span>
+                      <span>TCS</span>
+                      <span>HDFCBANK</span>
+                      <span>ICICIBANK</span>
+                      <span>INFY</span>
+                      <span>SBIN</span>
+                      <span>LT</span>
+                      <span>ITC</span>
+                      <span>RELIANCE</span>
+                      <span>TCS</span>
+                      <span>HDFCBANK</span>
+                      <span>ICICIBANK</span>
+                    </div>
+                  </div>
+                  <div className="hero-symbol-lane lane-mid">
+                    <div className="hero-symbol-track reverse">
+                      <span>AXISBANK</span>
+                      <span>KOTAKBANK</span>
+                      <span>BHARTIARTL</span>
+                      <span>MARUTI</span>
+                      <span>BAJFINANCE</span>
+                      <span>ASIANPAINT</span>
+                      <span>AXISBANK</span>
+                      <span>KOTAKBANK</span>
+                      <span>BHARTIARTL</span>
+                      <span>MARUTI</span>
+                      <span>BAJFINANCE</span>
+                      <span>ASIANPAINT</span>
+                    </div>
+                  </div>
+                  <div className="hero-symbol-lane lane-bottom">
+                    <div className="hero-symbol-track slow">
+                      <span>NTPC</span>
+                      <span>POWERGRID</span>
+                      <span>SUNPHARMA</span>
+                      <span>TITAN</span>
+                      <span>ULTRACEMCO</span>
+                      <span>ONGC</span>
+                      <span>NTPC</span>
+                      <span>POWERGRID</span>
+                      <span>SUNPHARMA</span>
+                      <span>TITAN</span>
+                      <span>ULTRACEMCO</span>
+                      <span>ONGC</span>
+                    </div>
+                  </div>
+                  <div className="hero-focus-orb">
+                    <span className="hero-focus-ring ring-1" />
+                    <span className="hero-focus-ring ring-2" />
+                    <span className="hero-focus-ring ring-3" />
+                    <span className="hero-focus-crosshair" />
+                  </div>
+                  <div className="hero-data-columns">
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <button
-                onClick={runScan}
-                disabled={loading || !symbolsInput.trim()}
-              >
-                {loading ? 'Scanning…' : 'Scan Stock'}
-              </button>
-
-{lastUpdated && (
-  <div className="muted" style={{ marginTop: 6, textAlign: 'center' }}>
-    Last updated: {lastUpdated.toLocaleTimeString()}
-  </div>
-)}
-
-          </div>
-
-          <div className="result-section">
-            {loading ? (
-              <div className="result-grid">
-                <SkeletonCard />
-                <SkeletonCard />
+            <div className="scan-panel">
+              <div className="scan-panel-chrome" aria-hidden="true">
+                <span />
+                <span />
+                <span />
               </div>
-            ) : data.length > 0 ? (
-              <div className="result-grid">
-                {data.map((item, index) => (
-                  <StockCard
-                    key={item?.symbol || index}
-                    item={item}
-                    onPaperTrade={openPaperTrade}
+              <div className="scan-panel-visual" aria-hidden="true">
+                <div className="scan-grid-flow">
+                  <span className="scan-grid-line line-1" />
+                  <span className="scan-grid-line line-2" />
+                  <span className="scan-grid-line line-3" />
+                  <span className="scan-grid-line line-4" />
+                </div>
+                <div className="scan-query-stream">
+                  <span>RELIANCE</span>
+                  <span>BHARTIARTL</span>
+                  <span>TCS</span>
+                  <span>INFY</span>
+                  <span>SBIN</span>
+                  <span>ICICIBANK</span>
+                </div>
+                <div className="scan-query-stream alt">
+                  <span>HDFCBANK</span>
+                  <span>LT</span>
+                  <span>KOTAKBANK</span>
+                  <span>MARUTI</span>
+                  <span>ITC</span>
+                  <span>AXISBANK</span>
+                </div>
+                <span className="scan-beam" />
+                <span className="scan-target-node" />
+                <span className="scan-target-node second" />
+              </div>
+
+              <div className="search-box">
+                <label>Enter Stock Symbol</label>
+
+                <div className="search-wrapper">
+                  <input
+                    value={symbolsInput}
+                    onChange={(e) => {
+                      setSymbolsInput(e.target.value.toUpperCase())
+                      setSelectedSymbol('')
+                      setShowSuggestions(true)
+                    }}
+                    placeholder="Search NSE stock (RELIANCE, BHARTIARTL, TCS...)"
                   />
-                ))}
+
+                  {showSuggestions && filteredSuggestions.length > 0 && (
+                    <div className="suggestions">
+                      {filteredSuggestions.map((s) => (
+                        <div
+                          key={s.symbol}
+                          className="suggestion-item"
+                          onMouseDown={() => {
+                            setSymbolsInput(s.symbol)
+                            setSelectedSymbol(s.symbol)
+                            setShowSuggestions(false)
+                          }}
+                        >
+                          <strong>{s.symbol}</strong>
+                          <span>{s.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={runScan}
+                  disabled={loading || !symbolsInput.trim()}
+                >
+                  {loading ? 'Scanning…' : 'Scan Stock'}
+                </button>
+
+                {lastUpdated && (
+                  <div className="muted scan-last-updated">
+                    Last updated: {lastUpdated.toLocaleTimeString()}
+                  </div>
+                )}
               </div>
-            ) : null}
+            </div>
+
+            <div className="result-section">
+              {loading ? (
+                <div className="result-grid">
+                  <SkeletonCard />
+                  <SkeletonCard />
+                </div>
+              ) : data.length > 0 ? (
+                <div className="result-grid">
+                  {data.map((item, index) => (
+                    <StockCard
+                      key={item?.symbol || index}
+                      item={item}
+                      onPaperTrade={openPaperTrade}
+                    />
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            <CollapsibleSection title="🔥 Intraday Positive Stocks" defaultCollapsed={true}>
+              <IntradayStocksList
+                onPaperTrade={openPaperTrade}
+                onPriceUpdate={syncTradePrices}
+              />
+            </CollapsibleSection>
+
+            <CollapsibleSection title="🔥 Swing Trading Opportunities" defaultCollapsed={true}>
+              <SwingStocksList
+                onPaperTrade={openPaperTrade}
+                onPriceUpdate={syncTradePrices}
+              />
+            </CollapsibleSection>
           </div>
 
-          <CollapsibleSection title="🔥 Intraday Positive Stocks" defaultCollapsed={true}>
-            <IntradayStocksList
-              onPaperTrade={openPaperTrade}
-              onPriceUpdate={syncTradePrices}
+          {/* RIGHT PANEL */}
+          <div className="right-panel">
+            <MarketOverview />
+            <PaperTradesPanel
+              trades={paperTrades}
+              onCloseTrade={closePaperTrade}
+              onDeleteTrade={deletePaperTrade}
+              onClearClosedTrades={clearClosedPaperTrades}
+              marketLive={marketLive}
             />
-          </CollapsibleSection>
-
-          <CollapsibleSection title="🔥 Swing Trading Opportunities" defaultCollapsed={true}>
-            <SwingStocksList
-              onPaperTrade={openPaperTrade}
-              onPriceUpdate={syncTradePrices}
-            />
-          </CollapsibleSection>
-
+          </div>
         </div>
 
-        {/* RIGHT PANEL */}
-        <div className="right-panel">
-          <MarketOverview />
-          <PaperTradesPanel
-            trades={paperTrades}
-            onCloseTrade={closePaperTrade}
-            onDeleteTrade={deletePaperTrade}
-            onClearClosedTrades={clearClosedPaperTrades}
-            marketLive={marketLive}
+        <MarketTicker />
+
+        {paperTradeDraft && (
+          <PaperTradeModal
+            key={`${paperTradeDraft.symbol}-${paperTradeDraft.mode}-${paperTradeDraft.source}-${paperTradeDraft.entryPrice}-${paperTradeDraft.stopLoss}-${paperTradeDraft.target1}-${paperTradeDraft.target2}`}
+            draft={paperTradeDraft}
+            onClose={() => setPaperTradeDraft(null)}
+            onConfirm={confirmPaperTrade}
           />
-        </div>
+        )}
 
-      </div>
+        {toast && (
+          <div className="app-toast" role="status" aria-live="polite">
+            {toast}
+          </div>
+        )}
 
-      <MarketTicker />
-
-      {paperTradeDraft && (
-        <PaperTradeModal
-          key={`${paperTradeDraft.symbol}-${paperTradeDraft.mode}-${paperTradeDraft.source}-${paperTradeDraft.entryPrice}-${paperTradeDraft.stopLoss}-${paperTradeDraft.target1}-${paperTradeDraft.target2}`}
-          draft={paperTradeDraft}
-          onClose={() => setPaperTradeDraft(null)}
-          onConfirm={confirmPaperTrade}
-        />
-      )}
-
-      {toast && (
-        <div className="app-toast" role="status" aria-live="polite">
-          {toast}
-        </div>
-      )}
-
-      <div className="footer">
-        <div className="footer-content">
-          <p>Focused on Indian NSE stocks (NIFTY 500). Symbols must be valid NSE tickers.</p>
-          <div className="disclaimer">
-            <p>Market data shown is for informational purposes only. Not intended for trading decisions.</p>
-            <p>This application is not affiliated with NSE, BSE, or any financial organization.</p>
+        <div className="footer">
+          <div className="footer-content">
+            <p>Focused on Indian NSE stocks (NIFTY 500). Symbols must be valid NSE tickers.</p>
+            <div className="disclaimer">
+              <p>Market data shown is for informational purposes only. Not intended for trading decisions.</p>
+              <p>This application is not affiliated with NSE, BSE, or any financial organization.</p>
+            </div>
           </div>
         </div>
       </div>
