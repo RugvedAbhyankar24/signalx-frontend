@@ -353,9 +353,9 @@ export default function App() {
               <div className="hero-panel-layout">
                 <div className="hero-copy">
                   <div className="hero">
-                    <h1>SignalX — Smart Intraday Trade Signals</h1>
+                    <h1>SignalX — Smart Trade Signals</h1>
                     <p>
-                      Intraday scanner using <b>Gap %, RSI, VWAP & Volume</b>
+                      Multi-timeframe scanner with technical analysis
                     </p>
                   </div>
 
