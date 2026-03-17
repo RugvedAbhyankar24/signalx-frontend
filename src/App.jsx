@@ -8,6 +8,7 @@ import SwingStocksList from './components/SwingStocksList'
 import CollapsibleSection from './components/CollapsibleSection'
 import PaperTradeModal from './components/PaperTradeModal'
 import PaperTradesPanel from './components/PaperTradesPanel'
+import AnalyticsModal from './components/AnalyticsModal'
 import {
   autoSquareOffIntradayTrades,
   createPaperTrade,
@@ -110,6 +111,7 @@ export default function App() {
   const [lastUpdated, setLastUpdated] = useState(null)
   const [paperTrades, setPaperTrades] = useState(() => loadPaperTrades())
   const [paperTradeDraft, setPaperTradeDraft] = useState(null)
+  const [showAnalytics, setShowAnalytics] = useState(false)
   const [toast, setToast] = useState('')
   const autoRefreshRef = useRef(null)
   const paperQuotesRefreshRef = useRef(null)
@@ -564,6 +566,7 @@ export default function App() {
               onDeleteTrade={deletePaperTrade}
               onClearClosedTrades={clearClosedPaperTrades}
               marketLive={marketLive}
+              onShowAnalytics={() => setShowAnalytics(true)}
             />
           </div>
         </div>
@@ -576,6 +579,13 @@ export default function App() {
             draft={paperTradeDraft}
             onClose={() => setPaperTradeDraft(null)}
             onConfirm={confirmPaperTrade}
+          />
+        )}
+
+        {showAnalytics && (
+          <AnalyticsModal
+            trades={paperTrades}
+            onClose={() => setShowAnalytics(false)}
           />
         )}
 

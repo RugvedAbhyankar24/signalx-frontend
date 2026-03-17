@@ -44,6 +44,7 @@ export default function PaperTradesPanel({
   onDeleteTrade,
   onClearClosedTrades,
   marketLive,
+  onShowAnalytics,
 }) {
   const [showClosed, setShowClosed] = useState(false)
 
@@ -106,9 +107,17 @@ export default function PaperTradesPanel({
               : 'Market closed. PnL is frozen at the last market price until a fresh quote comes in.'}
           </p>
         </div>
-        <span className={`paper-market-state ${marketLive ? 'market-live' : 'market-frozen'}`}>
-          {marketLive ? 'Live MTM' : 'Price Frozen'}
-        </span>
+        <div className="paper-header-actions">
+          <button 
+            className="paper-dashboard-btn"
+            onClick={onShowAnalytics}
+          >
+            📊 Show Analytics
+          </button>
+          <span className={`paper-market-state ${marketLive ? 'market-live' : 'market-frozen'}`}>
+            {marketLive ? 'Live MTM' : 'Price Frozen'}
+          </span>
+        </div>
       </div>
 
       <div className="paper-trades-summary">
