@@ -6,8 +6,7 @@ const API_BASE = 'https://signalx-backend.onrender.com/api';
 const api = axios.create({
   baseURL: API_BASE,
   timeout: 10000, // 10 seconds
-  headers: {
-    'Content-Type': 'application/json',
+  headers: { 'Content-Type': 'application/json',
   },
 });
 
@@ -69,6 +68,9 @@ export default {
   // News endpoints
   getNews: (symbol) => 
     api.get('/news', { params: { symbol } }),
+
+  getNewsWatchlist: () =>
+    api.get('/news/watchlist'),
   
   // Scan endpoints
   scan: (params) => 

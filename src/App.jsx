@@ -9,6 +9,7 @@ import CollapsibleSection from './components/CollapsibleSection'
 import PaperTradeModal from './components/PaperTradeModal'
 import PaperTradesPanel from './components/PaperTradesPanel'
 import AnalyticsModal from './components/AnalyticsModal'
+import NewsWatchModal from './components/NewsWatchModal'
 import {
   autoSquareOffIntradayTrades,
   createPaperTrade,
@@ -112,6 +113,7 @@ export default function App() {
   const [paperTrades, setPaperTrades] = useState(() => loadPaperTrades())
   const [paperTradeDraft, setPaperTradeDraft] = useState(null)
   const [showAnalytics, setShowAnalytics] = useState(false)
+  const [showNewsWatch, setShowNewsWatch] = useState(false)
   const [toast, setToast] = useState('')
   const autoRefreshRef = useRef(null)
   const paperQuotesRefreshRef = useRef(null)
@@ -370,6 +372,13 @@ export default function App() {
                         {marketLive ? '🟢 Market Live' : '🕒 Market Closed'}
                       </div>
                     </div>
+                    <button
+                      type="button"
+                      className="news-radar-trigger"
+                      onClick={() => setShowNewsWatch(true)}
+                    >
+                      Daily News Radar
+                    </button>
                   </div>
                 </div>
 
@@ -587,6 +596,10 @@ export default function App() {
             trades={paperTrades}
             onClose={() => setShowAnalytics(false)}
           />
+        )}
+
+        {showNewsWatch && (
+          <NewsWatchModal onClose={() => setShowNewsWatch(false)} />
         )}
 
         {toast && (
