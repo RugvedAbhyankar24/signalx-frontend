@@ -7,12 +7,12 @@ export default function AnalyticsModal({ trades, onClose }) {
     <div className="analytics-modal-backdrop" onClick={onClose}>
       <div className="analytics-modal" onClick={(event) => event.stopPropagation()}>
         <div className="analytics-modal-header">
-          <div>
+          <div className="analytics-modal-header-left">
             <div className="analytics-modal-eyebrow">Performance Analytics</div>
             <h3>📊 Paper Trading Dashboard</h3>
             <p>Comprehensive analysis of your paper trading performance with advanced metrics and visualizations.</p>
           </div>
-          <button className="analytics-modal-close" onClick={onClose}>×</button>
+          <button className="analytics-modal-close" onClick={onClose} aria-label="Close">✕</button>
         </div>
 
         <div className="analytics-modal-body">

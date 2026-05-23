@@ -71,7 +71,9 @@ export default function NewsWatchModal({ onClose }) {
     let refreshAfterMs = 15 * 60 * 1000
 
     try {
-      const response = await API.getNewsWatchlist()
+      // Manual refresh busts the server-side cache so the user always gets
+      // a fresh rebuild — not the same cached payload served back again.
+      const response = await API.getNewsWatchlist({ force: manual })
       const payload = response.data
       if (!isMounted.current) return
       setData(payload)
@@ -161,7 +163,9 @@ export default function NewsWatchModal({ onClose }) {
     : null
 
   const countdownLabel = countdown != null && !refreshing
-    ? `Refreshes in ${formatCountdown(countdown)}`
+    ? `Auto-refreshes in ${formatCountdown(countdown)}`
+    : refreshing
+    ? 'Fetching fresh news…'
     : null
 
   /* ── render helpers ─────────────────────── */

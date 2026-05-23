@@ -81,17 +81,17 @@
 .dashboard-empty-state {
   text-align: center;
   padding: 3rem 1rem;
-  color: #6b7280;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  color: var(--muted);
+  background: rgba(162, 177, 209, 0.04);
   border-radius: 12px;
-  border: 2px dashed #e2e8f0;
+  border: 2px dashed rgba(162, 177, 209, 0.18);
 }
 
 .dashboard-empty-state h4 {
   margin: 0 0 0.5rem 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--text);
 }
 
 .dashboard-summary-grid {
@@ -103,21 +103,21 @@
 }
 
 .summary-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid #e2e8f0;
+  background: rgba(10, 16, 28, 0.7);
+  border: 1px solid rgba(0, 255, 200, 0.12);
   border-radius: 12px;
   padding: 1.25rem;
   display: flex;
   align-items: center;
   gap: 1rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   min-height: 100px;
 }
 
 .summary-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 255, 200, 0.24);
+  box-shadow: 0 4px 20px rgba(0, 255, 200, 0.06);
 }
 
 .summary-icon {
@@ -142,7 +142,7 @@
 
 .summary-label {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--muted);
   font-weight: 500;
   margin-bottom: 0.25rem;
   line-height: 1.2;
@@ -151,16 +151,16 @@
 .summary-value {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text);
   line-height: 1.2;
 }
 
 .summary-value.positive {
-  color: #059669;
+  color: #6ee7b7;
 }
 
 .summary-value.negative {
-  color: #dc2626;
+  color: #fda4af;
 }
 
 .dashboard-charts-grid {
@@ -304,7 +304,7 @@
 .performance-bar {
   width: 100%;
   height: 6px;
-  background: #f1f5f9;
+  background: rgba(162, 177, 209, 0.12);
   border-radius: 3px;
   overflow: hidden;
   position: relative;
@@ -349,7 +349,7 @@
 
 .paper-dashboard-section {
   margin-bottom: 2rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid rgba(162, 177, 209, 0.12);
   padding-top: 1.5rem;
 }
 
@@ -488,21 +488,21 @@
 }
 
 .recharts-tooltip-wrapper {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 8px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-  backdrop-filter: blur(8px) !important;
+  background: rgba(11, 17, 28, 0.96) !important;
+  border: 1px solid rgba(0, 229, 255, 0.2) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(12px) !important;
 }
 
 .recharts-tooltip-label {
   font-weight: 600 !important;
-  color: #1f2937 !important;
+  color: var(--text) !important;
   margin-bottom: 0.25rem !important;
 }
 
 .recharts-tooltip-item {
-  color: #4b5563 !important;
+  color: var(--muted) !important;
   font-size: 0.875rem !important;
 }
 
@@ -512,7 +512,7 @@
   align-items: center;
   justify-content: center;
   height: 300px;
-  color: #6b7280;
+  color: var(--muted);
   font-size: 0.875rem;
 }
 
@@ -520,8 +520,8 @@
   content: '';
   width: 20px;
   height: 20px;
-  border: 2px solid #e2e8f0;
-  border-top: 2px solid #3b82f6;
+  border: 2px solid rgba(162, 177, 209, 0.15);
+  border-top: 2px solid var(--neon-cyan);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-right: 0.5rem;

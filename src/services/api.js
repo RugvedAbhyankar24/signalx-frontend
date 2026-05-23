@@ -69,8 +69,8 @@ export default {
   getNews: (symbol) => 
     api.get('/news', { params: { symbol } }),
 
-  getNewsWatchlist: () =>
-    api.get('/news/watchlist'),
+  getNewsWatchlist: ({ force = false } = {}) =>
+    api.get('/news/watchlist', { params: force ? { force: 'true' } : {} }),
   
   // Scan endpoints
   scan: (params) => 
