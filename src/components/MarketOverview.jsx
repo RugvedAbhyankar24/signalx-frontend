@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import API from '../services/api'
+import { isMarketLive } from '../utils/marketUtils'
 
 export default function MarketOverview() {
   const [data, setData] = useState(null)
@@ -21,7 +22,10 @@ export default function MarketOverview() {
       }
     }
 
+    // Always load once on mount to show last-known data
     load()
+    // Only poll during live NSE trading hours (skips weekends + holidays)
+    if (!isMarketLive()) return
     const i = setInterval(load, 15000)
     return () => clearInterval(i)
   }, [])

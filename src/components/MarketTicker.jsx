@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import API from '../services/api'
+import { isMarketLive } from '../utils/marketUtils'
 
 export default function MarketTicker() {
   const [indices, setIndices] = useState([])
@@ -18,8 +19,11 @@ export default function MarketTicker() {
   }
 
   useEffect(() => {
+    // Always load once on mount to show last-known data
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load()
+    // Only poll during live NSE trading hours (skips weekends + holidays)
+    if (!isMarketLive()) return
     const i = setInterval(load, 60000)
     return () => clearInterval(i)
   }, [])

@@ -18,6 +18,7 @@ import {
   savePaperTrades,
   updateTradesWithQuotes,
 } from './utils/paperTrading'
+import { loadHolidays } from './utils/marketUtils'
 
 const NSE_SUGGESTIONS = [
   { symbol: 'RELIANCE', name: 'Reliance Industries Ltd' },
@@ -119,6 +120,10 @@ export default function App() {
   const paperQuotesRefreshRef = useRef(null)
   const scanRequestRef = useRef(false)
   const paperQuotesRequestRef = useRef(false)
+
+  // Fetch NSE holidays once on mount so isMarketLive() knows real closure days.
+  // Fire-and-forget — falls back gracefully if the backend is unavailable.
+  useEffect(() => { loadHolidays() }, [])
 
   useEffect(() => {
     const i = setInterval(() => {

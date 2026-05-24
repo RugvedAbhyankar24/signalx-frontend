@@ -85,6 +85,9 @@ export default {
   // Market indices (NIFTY / BANK NIFTY / SENSEX)
   getMarketIndices: () => api.get('/market/indices'),
 
+  // NSE trading holidays for the current year (cached 12h on backend)
+  getMarketHolidays: () => api.get('/market/holidays'),
+
   getPaperTradeQuotes: (symbols) =>
     api.post('/market/quotes', { symbols }, { timeout: 15000 }),
 
