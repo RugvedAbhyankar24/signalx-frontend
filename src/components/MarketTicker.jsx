@@ -7,25 +7,27 @@ export default function MarketTicker() {
   const [gainers, setGainers] = useState([])
   const [losers, setLosers] = useState([])
 
-  const load = async () => {
-    try {
-      const res = await API.getTicker()
-      setIndices(res.data.indices || [])
-      setGainers(res.data.gainers || [])
-      setLosers(res.data.losers || [])
-    } catch {
-      console.error('Ticker load failed')
-    }
-  }
-
   useEffect(() => {
+    const controller = new AbortController()
+
+    const load = async () => {
+      try {
+        const res = await API.getTicker({ signal: controller.signal })
+        setIndices(res.data.indices || [])
+        setGainers(res.data.gainers || [])
+        setLosers(res.data.losers || [])
+      } catch (e) {
+        if (e.name === 'CanceledError' || e.name === 'AbortError' || e.code === 'ERR_CANCELED') return
+        console.error('[ticker] load failed:', e.message)
+      }
+    }
+
     // Always load once on mount to show last-known data
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     load()
     // Only poll during live NSE trading hours (skips weekends + holidays)
-    if (!isMarketLive()) return
+    if (!isMarketLive()) return () => controller.abort()
     const i = setInterval(load, 60000)
-    return () => clearInterval(i)
+    return () => { controller.abort(); clearInterval(i) }
   }, [])
 
   if (!indices.length) return null
@@ -112,11 +114,13 @@ return (
               <strong>{i.name}</strong>
 
               <span className="ticker-value">
-                {i.last.toLocaleString()}
+                {i.last?.toLocaleString()}
               </span>
 
               <span className="ticker-pct">
-                {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
+                {pct != null
+                  ? `${pct > 0 ? '+' : ''}${pct.toFixed(2)}%`
+                  : '—'}
               </span>
             </span>
           )

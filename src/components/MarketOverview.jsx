@@ -8,26 +8,29 @@ export default function MarketOverview() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    const controller = new AbortController()
+
     const load = async () => {
       try {
         setIsLoading(true)
-        const res = await API.getMarketIndices()
+        const res = await API.getMarketIndices({ signal: controller.signal })
         setData(res.data)
         setError(null)
       } catch (e) {
+        if (e.name === 'CanceledError' || e.name === 'AbortError' || e.code === 'ERR_CANCELED') return
         console.error('Market overview error', e)
         setError('Failed to load market data')
       } finally {
-        setIsLoading(false)
+        if (!controller.signal.aborted) setIsLoading(false)
       }
     }
 
     // Always load once on mount to show last-known data
     load()
     // Only poll during live NSE trading hours (skips weekends + holidays)
-    if (!isMarketLive()) return
+    if (!isMarketLive()) return () => controller.abort()
     const i = setInterval(load, 15000)
-    return () => clearInterval(i)
+    return () => { controller.abort(); clearInterval(i) }
   }, [])
 
   const formatNumber = (num) => {

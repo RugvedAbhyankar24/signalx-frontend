@@ -96,7 +96,6 @@ export default function PaperTradingDashboard({ trades }) {
     // Daily Equity Curve Calculation
     const dailyEquityMap = new Map()
     let runningEquity = 100000 // Starting capital
-    dailyEquityMap.set(new Date().toISOString().split('T')[0], runningEquity)
 
     // Sort trades by date
     const sortedTrades = [...closedTrades].sort((a, b) => {
@@ -110,6 +109,10 @@ export default function PaperTradingDashboard({ trades }) {
       runningEquity += Number(trade.realizedPnl || 0)
       dailyEquityMap.set(date, runningEquity)
     })
+
+    // Anchor today's equity AFTER applying all trade PnL so the final point
+    // reflects the actual current equity, not the pre-trade starting capital.
+    dailyEquityMap.set(new Date().toISOString().split('T')[0], runningEquity)
 
     const dailyEquity = Array.from(dailyEquityMap.entries())
       .map(([date, equity]) => ({
@@ -442,7 +445,7 @@ export default function PaperTradingDashboard({ trades }) {
           <div className="summary-icon">�</div>
           <div className="summary-content">
             <div className="summary-label">Total Return %</div>
-            <div className="summary-value positive">
+            <div className={`summary-value ${analytics.summary.totalReturnPercent >= 0 ? 'positive' : 'negative'}`}>
               {analytics.summary.totalReturnPercent.toFixed(2)}%
             </div>
           </div>

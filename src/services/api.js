@@ -80,13 +80,25 @@ export default {
   scanMultiple: (symbols) => 
     api.post('/scan', { symbols }, { timeout: 60000 }), // 60 seconds for scan
 
-  getTicker: () => api.get('/ticker'),
+  getTicker: ({ signal } = {}) => api.get('/ticker', { signal }),
 
   // Market indices (NIFTY / BANK NIFTY / SENSEX)
-  getMarketIndices: () => api.get('/market/indices'),
+  getMarketIndices: ({ signal } = {}) => api.get('/market/indices', { signal }),
 
   // NSE trading holidays for the current year (cached 12h on backend)
   getMarketHolidays: () => api.get('/market/holidays'),
+
+  getStructuredEvents: (symbol) =>
+    api.get('/market/events', { params: symbol ? { symbol } : {}, timeout: 20000 }),
+
+  getMarketActivity: ({ symbol, biasDirection } = {}) =>
+    api.get('/market/activity', {
+      params: {
+        ...(symbol ? { symbol } : {}),
+        ...(biasDirection ? { biasDirection } : {}),
+      },
+      timeout: 20000
+    }),
 
   getPaperTradeQuotes: (symbols) =>
     api.post('/market/quotes', { symbols }, { timeout: 15000 }),
@@ -95,8 +107,8 @@ export default {
     api.post('/market/leverage', { symbols }, { timeout: 15000 }),
 
   // Intraday positive stocks
-  getIntradayPositiveStocks: (symbols) => 
-    api.post('/intraday', { symbols }, { timeout: 60000 }), // 60 seconds for intraday
+  getIntradayPositiveStocks: (symbols) =>
+    api.post('/intraday', { symbols }, { timeout: 240000 }), // 240 seconds — accounts for NSE session retries and deep scans
 
   // Background scan endpoints
   startIntradayScan: () => 
@@ -106,8 +118,14 @@ export default {
     api.get('/intraday/status', { timeout: 5000 }), // 5 seconds to get status
 
   // Swing trading positive stocks
-  getSwingPositiveStocks: (symbols) => 
-    api.post('/swing', { symbols }, { timeout: 60000 }), // 60 seconds for swing
+  getSwingPositiveStocks: (symbols) =>
+    api.post('/swing', { symbols }, { timeout: 240000 }), // 240 seconds — accounts for NSE session retries and deep scans
+
+  runSwingBacktest: (params) =>
+    api.post('/swing/backtest', params, { timeout: 120000 }),
+
+  runSwingThresholdSweep: (params) =>
+    api.post('/swing/backtest/sweep', params, { timeout: 120000 }),
 
   // Background swing scan endpoints
   startSwingScan: () => 
